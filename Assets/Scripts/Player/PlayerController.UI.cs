@@ -35,35 +35,7 @@ public partial class PlayerController : MonoBehaviour
         shootButton.onClick.AddListener( (() => {HandleStates(PlayerStates.Shoot);}));
         dashButton.onClick.AddListener( (() => {HandleStates(PlayerStates.Dash);}));
     }
-
-    private void HandleStates(PlayerStates state)
-    {
-        switch (state)
-        {
-            case PlayerStates.Move:
-                
-                break;
-            
-            case PlayerStates.Pass:
-                
-                break;
-            
-            case PlayerStates.Tackle:
-                
-                break;
-            
-            case PlayerStates.Shoot:
-                
-                break;
-            
-            case PlayerStates.Dash:
-                
-                break;
-        }
-        
-        ToggleUI(false);
-    }
-
+    
     #endregion
 
     private void ToggleUI(bool state)

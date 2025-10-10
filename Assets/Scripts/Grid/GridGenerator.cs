@@ -84,7 +84,7 @@ public class GridGenerator : MonoBehaviour
 
     public void ClearGrid()
     {
-        foreach (Transform tiles in transform)
+        foreach (Transform tiles in gridParent)
         {
             Destroy(tiles.gameObject);
         }
