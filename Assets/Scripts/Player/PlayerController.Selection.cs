@@ -19,7 +19,19 @@ public partial class PlayerController : MonoBehaviour
                 if (clickedTile != null && GridGenerator.instance.highlightedTiles.Contains(clickedTile))
                 {
                     DebugLogger.Log("Target Tile Selected", "yellow");
-                    MoveToTile(clickedTile);
+
+                    switch(currentAction)
+                    {
+                        case PlayerStates.Move:
+                            MoveToTile(clickedTile);
+                            break;
+
+                        case PlayerStates.Pass:
+                            PassToPlayer(clickedTile);
+                            break;
+                    }
+
+                    
                     GridGenerator.instance.ClearHighlightedTiles();
                     canSelect = false;
                 }

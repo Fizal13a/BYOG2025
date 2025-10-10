@@ -34,6 +34,7 @@ public partial class GameManager : MonoBehaviour
 
         if (turnRoutine != null) StopCoroutine(turnRoutine);
         turnRoutine = StartCoroutine(WaitAndStartNextTurn(GameSettings.GameState.PlayerTurn));
+        GridGenerator.instance.ClearHighlightedTiles();
     }
 
     // --- Wait State --- 

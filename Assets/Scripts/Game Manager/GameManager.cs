@@ -70,7 +70,7 @@ public partial class GameManager : MonoBehaviour
                 players[i].name = $"Player_{i}";
                 players[i].transform.SetParent(playersParent);
                 Player player  = players[i].GetComponent<Player>();
-                playerController.AddPlayer(player,gridPos);
+                playerController.AddPlayer(player,gridPos,i);
             }
             
             GridTile tileScript = GridGenerator.instance.GetTile(gridPos.x, gridPos.y);

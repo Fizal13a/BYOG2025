@@ -20,6 +20,7 @@ public partial class PlayerController : MonoBehaviour
     [Header("Turn Data")]
     private Player currentSelectedPlayer;
     private Player targetSelectedPlayer;
+    public  Player currentPlayerWithBall;
     private PlayerStates currentState;
     
     private bool isPlayerTurn = false;
@@ -36,10 +37,14 @@ public partial class PlayerController : MonoBehaviour
 
     #region Setters
 
-    public void AddPlayer(Player player, Vector2Int gridPos)
+    public void AddPlayer(Player player, Vector2Int gridPos, int index)
     {
-        players[0] = player;
-        player.SetUpPlayer(this, gridPos);
+        if(index<3)
+        {
+            players[index] = player;
+            player.SetUpPlayer(this, gridPos);
+        }
+       
     }
 
     public void SetUpTurn(bool turn)
@@ -78,6 +83,8 @@ public partial class PlayerController : MonoBehaviour
                 Player player = hit.collider.GetComponent<Player>();
                 if (player != null)
                 {
+                    GridGenerator.instance.ClearHighlightedTiles();
+
                     currentSelectedPlayer = player;
                     ToggleUI(true);
                 }

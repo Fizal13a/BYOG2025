@@ -133,6 +133,17 @@ public class GridGenerator : MonoBehaviour
         }
     }
 
+    public void HighlightTiles(int x, int y)
+    {
+
+        GridTile tile = GetTile(x, y);
+        if (tile != null && tile.IsWalkable)
+        {
+            tile.Highlight(true);
+            highlightedTiles.Add(tile);
+        }
+    }
+
     public void ClearHighlightedTiles()
     {
         foreach (var tile in highlightedTiles)

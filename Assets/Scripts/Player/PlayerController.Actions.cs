@@ -35,8 +35,18 @@ public partial class PlayerController : MonoBehaviour
     #endregion
     
     // --- Once the target player is selected, pass the ball to that player ---
-    private void PassToPlayer()
+    private void PassToPlayer(GridTile tile)
     {
+        foreach(var player in players)
+        {
+            if(player.GetGridPosition()==tile.GridPosition)
+            {
+                currentPlayerWithBall = player;
+                break;
+            }
+        }
+
+        BallController.instance.MoveBall(tile.transform);
         currentSelectedPlayer = null;
         GameManager.instance.EndTurnEarly();
     }

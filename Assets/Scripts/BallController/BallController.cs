@@ -13,7 +13,6 @@ public class BallController : MonoBehaviour
 
     Coroutine ballMoveCoroutine;
 
-    public bool moveBall;
     //private void Start()
    // {
         //BallMoveCoroutine = StartCoroutine(MoveAlongCurve());
@@ -27,10 +26,11 @@ public class BallController : MonoBehaviour
         }
     }
 
-
-    private void Update()
+    public void MoveBall(Transform tile)
     {
-        if (moveBall && ballMoveCoroutine == null)
+        targetTile = tile;
+
+        if (ballMoveCoroutine == null)
         {
             ballMoveCoroutine = StartCoroutine(MoveAlongCurve());
         }
@@ -59,7 +59,6 @@ public class BallController : MonoBehaviour
 
             transform.position = new Vector3(endPos.x, endPos.y + 0.3f, endPos.z);
 
-            moveBall = false;
             ballMoveCoroutine = null;
         }
     }

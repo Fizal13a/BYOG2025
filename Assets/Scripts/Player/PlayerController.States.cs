@@ -2,8 +2,12 @@ using UnityEngine;
 
 public partial class PlayerController : MonoBehaviour
 {
+
+    private PlayerStates currentAction;
     private void HandleStates(PlayerStates state)
     {
+        currentAction = state;
+
         switch (state)
         {
             case PlayerStates.Move:
@@ -13,7 +17,18 @@ public partial class PlayerController : MonoBehaviour
                 break;
             
             case PlayerStates.Pass:
+
+                foreach(var player in players)
+                {
+                    if (player == currentPlayerWithBall)
+                        continue;
+
+                    Vector2Int positionIndex = player.GetGridPosition();
+
+                    GridGenerator.instance.HighlightTiles(positionIndex.x, positionIndex.y);
+                }
                 DebugLogger.Log("Player On Pass State", "yellow");
+                canSelect = true;
                 break;
             
             case PlayerStates.Tackle:
