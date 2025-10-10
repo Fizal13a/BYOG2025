@@ -37,21 +37,25 @@ public partial class PlayerController : MonoBehaviour
     // --- Once the target player is selected, pass the ball to that player ---
     private void PassToPlayer()
     {
-        
+        currentSelectedPlayer = null;
+        GameManager.instance.EndTurnEarly();
     }
     // --- Once the AI with ball is in the adjustment tile, Can get the ball back ---
     private void Tackle()
     {
-        
+        currentSelectedPlayer = null;
+        GameManager.instance.EndTurnEarly();
     }
     // --- Shoot the ball to goal ---
     private void ShootToGoal()
     {
-        
+        currentSelectedPlayer = null;
+        GameManager.instance.EndTurnEarly();
     }
     // --- Pass to a player and move at the same time ---
     private void Dash()
     {
-        
+        currentSelectedPlayer = null;
+        GameManager.instance.EndTurnEarly();
     }
 }
