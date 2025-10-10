@@ -8,6 +8,8 @@ public partial class PlayerController : MonoBehaviour
         {
             case PlayerStates.Move:
                 DebugLogger.Log("Player On Move State", "yellow");
+                GridGenerator.instance.HighlightMoveTiles(currentSelectedPlayer);
+                currentSelectedPlayer.SetSelection(true);
                 break;
             
             case PlayerStates.Pass:

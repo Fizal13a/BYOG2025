@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GridGenerator : MonoBehaviour
@@ -12,6 +13,8 @@ public class GridGenerator : MonoBehaviour
     // 2D array to store generated tiles
     private GameObject[,] grid;
     private GridTile[,] gridTiles;
+    
+    public List<GridTile> highlightedTiles =  new List<GridTile>();
 
     #region Initialization
 
@@ -94,6 +97,48 @@ public class GridGenerator : MonoBehaviour
         if(gridTiles != null)
             Array.Clear(gridTiles,0,gridTiles.Length);
     }
+    
+    public void HighlightMoveTiles(Player player)
+    {
+        ClearHighlightedTiles();
+
+        Vector2Int playerGridPos = player.GetGridPosition(); 
+    
+        Vector2Int[] directions = new Vector2Int[]
+        {
+            new Vector2Int(1, 0),   // right
+            new Vector2Int(-1, 0),  // left
+            new Vector2Int(0, 1),   // up
+            new Vector2Int(0, -1),  // down
+            new Vector2Int(2, 0),   // 2 right
+            new Vector2Int(-2, 0),  // 2 left
+            new Vector2Int(0, 2),   // 2 up
+            new Vector2Int(0, -2),  // 2 down
+            new Vector2Int(1, 1),   // top right
+            new Vector2Int(-1, 1),  // top left
+            new Vector2Int(1, -1),  // bottom right
+            new Vector2Int(-1, -1), // bottom left
+        };
+    
+        foreach (var dir in directions)
+        {
+            Vector2Int checkPos = playerGridPos + dir;
+            GridTile tile = GetTile(checkPos.x, checkPos.y);
+            if (tile != null && tile.IsWalkable)
+            {
+                tile.Highlight(true);
+                highlightedTiles.Add(tile);
+            }
+        }
+    }
+
+    public void ClearHighlightedTiles()
+    {
+        foreach (var tile in highlightedTiles)
+            tile.Highlight(false);
+        highlightedTiles.Clear();
+    }
+
 
     #endregion
    
