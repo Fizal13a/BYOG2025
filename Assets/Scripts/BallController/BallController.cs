@@ -1,9 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 
 public class BallController : MonoBehaviour
 {
+    public static BallController instance;
+    
     public Transform targetTile;
     public float moveDuration = 1.5f; 
     public float curveLength = 2f;
@@ -15,6 +18,14 @@ public class BallController : MonoBehaviour
    // {
         //BallMoveCoroutine = StartCoroutine(MoveAlongCurve());
     //}
+
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+    }
 
 
     private void Update()
