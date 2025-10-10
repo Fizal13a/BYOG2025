@@ -1,7 +1,10 @@
+using System;
 using UnityEngine;
 
 public partial class GameManager : MonoBehaviour
 {
+    public static GameManager instance;
+    
     [Header("Settings")]
     public GameSettings gameSettings;
     
@@ -28,7 +31,15 @@ public partial class GameManager : MonoBehaviour
 
     #region Initialization
 
-     void Start()
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+    }
+
+    void Start()
     {
         // --- All initializing goes here --- 
         InitializeMatch();
@@ -59,7 +70,7 @@ public partial class GameManager : MonoBehaviour
                 players[i].name = $"Player_{i}";
                 players[i].transform.SetParent(playersParent);
                 Player player  = players[i].GetComponent<Player>();
-                playerController.AddPlayer(player);
+                playerController.AddPlayer(player,gridPos);
             }
             
             GridTile tileScript = GridGenerator.instance.GetTile(gridPos.x, gridPos.y);

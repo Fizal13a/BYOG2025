@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public partial class PlayerController : MonoBehaviour
 {
@@ -14,6 +15,7 @@ public partial class PlayerController : MonoBehaviour
     [Header("Players Data")]
     private Player[] players;
     public LayerMask playerLayer;
+    public LayerMask tileLayer;
     
     [Header("Turn Data")]
     private Player currentSelectedPlayer;
@@ -34,9 +36,10 @@ public partial class PlayerController : MonoBehaviour
 
     #region Setters
 
-    public void AddPlayer(Player player)
+    public void AddPlayer(Player player, Vector2Int gridPos)
     {
         players[0] = player;
+        player.SetUpPlayer(this, gridPos);
     }
 
     public void SetUpTurn(bool turn)
@@ -50,14 +53,23 @@ public partial class PlayerController : MonoBehaviour
     {
         if(!isPlayerTurn) return;
 
+        if (canSelect)
+        {
+            HandleActionSelection();
+            return;
+        }
+
         // --- Raycast ---
-        HandleSelection();
+        HandlePlayerSelection();
     }
     
-    private void HandleSelection()
+    private void HandlePlayerSelection()
     {
         if (Input.GetMouseButtonDown(0)) // Left click
         {
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+                return;
+            
             Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
 

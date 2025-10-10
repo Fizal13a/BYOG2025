@@ -25,9 +25,9 @@ public partial class GameManager : MonoBehaviour
     // --- AI Turn --- 
     void StartAITurn()
     {
+        Debug.Log("AI Turn Started");
         currentState = GameSettings.GameState.AITurn;
         SetTurnDisplayText(currentState.ToString());
-        Debug.Log("AI Turn Started");
 
         aiPlayerController.SetUpTurn(true);
         playerController.SetUpTurn(false);
@@ -39,7 +39,6 @@ public partial class GameManager : MonoBehaviour
     // --- Wait State --- 
     IEnumerator WaitAndStartNextTurn(GameSettings.GameState nextState)
     {
-        currentState = GameSettings.GameState.Waiting;
         float currentTime = gameSettings.turnDuration;
 
         while (currentTime > 0)
@@ -71,6 +70,8 @@ public partial class GameManager : MonoBehaviour
                 StartAITurn();
             else if (currentState == GameSettings.GameState.AITurn)
                 StartPlayerTurn();
+            
+            DebugLogger.Log("End turn", "red");
         }
     }
 }

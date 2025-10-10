@@ -100,6 +100,7 @@ public class GridGenerator : MonoBehaviour
     
     public void HighlightMoveTiles(Player player)
     {
+        DebugLogger.Log($"Highlighting Tiles");
         ClearHighlightedTiles();
 
         Vector2Int playerGridPos = player.GetGridPosition(); 

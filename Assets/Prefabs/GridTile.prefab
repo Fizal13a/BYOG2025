@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 579820948985841862}
   - component: {fileID: 4678568417642368693}
   - component: {fileID: 4748478613942929375}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: GridTile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -68,7 +68,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 95af8789607276b4ab0c43389b02a760, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -124,3 +124,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 984d6f621236d7b47bff53a8bfc73020, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GridTile
+  GridPosition: {x: 0, y: 0}
+  IsWalkable: 1

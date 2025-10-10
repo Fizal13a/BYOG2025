@@ -560,6 +560,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GridGenerator
   gridParent: {fileID: 758924041}
   gameSettings: {fileID: 11400000, guid: b6e23d5285aa60f419979ab8bf2f2548, type: 2}
+  highlightedTiles: []
 --- !u!1 &665415126
 GameObject:
   m_ObjectHideFlags: 0
@@ -796,7 +797,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 2
   m_TargetDisplay: 0
 --- !u!1 &756562072
 GameObject:
@@ -2214,6 +2215,9 @@ MonoBehaviour:
   playerLayer:
     serializedVersion: 2
     m_Bits: 8
+  tileLayer:
+    serializedVersion: 2
+    m_Bits: 128
   playerUIPanel: {fileID: 985504920}
   moveButton: {fileID: 1266196142}
   passButton: {fileID: 1147200444}
