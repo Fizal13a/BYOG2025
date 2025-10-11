@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -44,12 +45,20 @@ public partial class PlayerController : MonoBehaviour
             players[index] = player;
             player.SetUpPlayer(this, gridPos);
         }
-       
     }
 
     public void SetUpTurn(bool turn)
     {
         isPlayerTurn = turn;
+    }
+
+    public void SetPlayerWithBall(Player player)
+    {
+        GameObject ball = GameManager.instance.GetBallObject();
+        DebugLogger.Log(ball.gameObject.name + ", " + player.gameObject.name, "yellow");
+        ball.transform.SetParent(player.ballHolderPosition);
+        ball.transform.localPosition = Vector3.zero;
+        currentPlayerWithBall = player;
     }
 
     #endregion

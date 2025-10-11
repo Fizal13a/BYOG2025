@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public partial class AIPlayerController : MonoBehaviour
@@ -12,8 +13,8 @@ public partial class AIPlayerController : MonoBehaviour
     [Header("AIs Data")]
     private AIPlayer[] ais;
     private bool hasBall = false;
-    private AIPlayer currentAIWithBall = null;
-    private AIPlayer currentSelectedAI = null;
+    public AIPlayer currentAIWithBall = null;
+    public AIPlayer currentSelectedAI = null;
     
     private bool isAITurn = false;
 
@@ -22,9 +23,13 @@ public partial class AIPlayerController : MonoBehaviour
         ais = new AIPlayer[3];
     }
 
-    public void AddAI(AIPlayer player)
+    public void AddAI(AIPlayer player, Vector2Int gridPos, int index)
     {
-        ais[0] = player;
+        if(index<3)
+        {
+            ais[index] = player;
+            player.SetUpPlayer(this, gridPos);
+        }
     }
 
     public void HasBall(bool status)
@@ -123,4 +128,30 @@ public partial class AIPlayerController : MonoBehaviour
         }
         return nearest;
     }
+    private GridTile GetNextTileTowardGoal(AIPlayer ai)
+    {
+        GridTile aiTile = GridGenerator.instance.GetTileFromWorld(ai.transform.position);
+        GridTile goalTile = GridGenerator.instance.goalTile;
+
+        // Get shortest path
+        List<GridTile> path = GridGenerator.instance.GetPath(aiTile, goalTile);
+        if (path != null && path.Count > 1)
+            return path[1]; // next step toward goal
+
+        return aiTile; // fallback
+    }
+    
+    private GridTile GetNextTileTowardBall(AIPlayer ai)
+    {
+        GridTile aiTile = GridGenerator.instance.GetTile(ai.GetGridPosition().x, ai.GetGridPosition().y);
+        GridTile ballTile = GridGenerator.instance.GetTile(GameManager.instance.GetCurrentBallPosition().x, GameManager.instance.GetCurrentBallPosition().y);
+
+        List<GridTile> path = GridGenerator.instance.GetPath(aiTile, ballTile);
+        if (path != null && path.Count > 1)
+            return path[1];
+
+        return aiTile;
+    }
+
+    
 }

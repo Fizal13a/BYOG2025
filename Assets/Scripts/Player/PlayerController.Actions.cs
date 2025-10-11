@@ -28,6 +28,11 @@ public partial class PlayerController : MonoBehaviour
         }
 
         currentSelectedPlayer.SetGridPosition(targetTile.GridPosition);
+        DebugLogger.Log($"Target Tile {targetTile.GridPosition}, Ball Position {GameManager.instance.GetCurrentBallPosition()}", "red");
+        if (targetTile.GridPosition == GameManager.instance.GetCurrentBallPosition())
+        {
+            SetPlayerWithBall(currentSelectedPlayer);
+        }
         currentSelectedPlayer = null;
         GameManager.instance.EndTurnEarly();
     }
@@ -37,6 +42,10 @@ public partial class PlayerController : MonoBehaviour
     // --- Once the target player is selected, pass the ball to that player ---
     private void PassToPlayer(GridTile tile)
     {
+        GameObject ball = GameManager.instance.GetBallObject();
+        DebugLogger.Log(ball.gameObject.name, "yellow");
+        ball.transform.SetParent(null);
+        
         foreach(var player in players)
         {
             if(player.GetGridPosition()==tile.GridPosition)

@@ -28,6 +28,11 @@ public partial class GameManager : MonoBehaviour
     private GameObject[] players;
     private GameObject[] aiPlayers;
     private GameObject ball;
+    
+    [Header("Runtime Datas")]
+    private Player currentPlayerWithBall;
+    private AIPlayer currentAIWithBall;
+    private Vector2Int currentBallPosition;
 
     #region Initialization
 
@@ -89,8 +94,8 @@ public partial class GameManager : MonoBehaviour
                 aiPlayers[i] = Instantiate(aiPrefab, spawnPos, Quaternion.identity);
                 aiPlayers[i].name = $"AI_{i}";
                 aiPlayers[i].transform.SetParent(aisParent);
-                AIPlayer ai  = players[i].GetComponent<AIPlayer>();
-                aiPlayerController.AddAI(ai);
+                AIPlayer ai  = aiPlayers[i].GetComponent<AIPlayer>();
+                aiPlayerController.AddAI(ai, gridPos, i);
             }
             
             GridTile tileScript = GridGenerator.instance.GetTile(gridPos.x, gridPos.y);
@@ -104,6 +109,7 @@ public partial class GameManager : MonoBehaviour
             Vector3 spawnPos = ballTile.transform.position + Vector3.up * 0.3f;
             ball = Instantiate(ballPrefab, spawnPos, Quaternion.identity);
             ball.name = "Ball";
+            SetBallPosition(ballSpawnTile);
         }
         
         GridTile ballTileScript = GridGenerator.instance.GetTile(ballSpawnTile.x, ballSpawnTile.y);
@@ -115,5 +121,47 @@ public partial class GameManager : MonoBehaviour
 
     #endregion
 
+    #region Getters
+
+    public Player GetCurrentPlayerWithBall()
+    {
+        return currentPlayerWithBall;
+    }
+
+    public AIPlayer GetCurrentAIWithBall()
+    {
+        return currentAIWithBall;
+    }
+
+    public Vector2Int GetCurrentBallPosition()
+    {
+        return currentBallPosition;
+    }
+
+    public GameObject GetBallObject()
+    {
+        return ball;
+    }
+
+    #endregion
+
+    #region Setters
+
+    public void SetPlayerWithBall(Player player)
+    {
+        currentPlayerWithBall = player;
+    }
+
+    public void SetAIWithBall(AIPlayer ai)
+    {
+        currentAIWithBall = ai;
+    }
+
+    public void SetBallPosition(Vector2Int position)
+    {
+        currentBallPosition = position;
+    }
+
+    #endregion
    
 }

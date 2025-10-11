@@ -561,6 +561,8 @@ MonoBehaviour:
   gridParent: {fileID: 758924041}
   gameSettings: {fileID: 11400000, guid: b6e23d5285aa60f419979ab8bf2f2548, type: 2}
   highlightedTiles: []
+  allTiles: []
+  goalTile: {fileID: 0}
 --- !u!1 &665415126
 GameObject:
   m_ObjectHideFlags: 0
@@ -1010,6 +1012,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 97dd6830b4c433c438b1b67c9f62cb82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AIPlayerController
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 8
 --- !u!1 &893772079
 GameObject:
   m_ObjectHideFlags: 0
@@ -2218,6 +2223,7 @@ MonoBehaviour:
   tileLayer:
     serializedVersion: 2
     m_Bits: 128
+  currentPlayerWithBall: {fileID: 0}
   playerUIPanel: {fileID: 985504920}
   moveButton: {fileID: 1266196142}
   passButton: {fileID: 1147200444}

@@ -5,6 +5,7 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     private PlayerController controller;
+    public Transform ballHolderPosition;
     
     [Header("Stats")]
     private float moveSpeed = 5f;
