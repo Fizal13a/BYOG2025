@@ -25,17 +25,23 @@ public partial class PlayerController : MonoBehaviour
 
                     Vector2Int positionIndex = player.GetGridPosition();
 
-                    GridGenerator.instance.HighlightTiles(positionIndex.x, positionIndex.y);
+                    GridGenerator.instance.HighlightPassTiles(positionIndex.x, positionIndex.y);
                 }
                 DebugLogger.Log("Player On Pass State", "yellow");
                 canSelect = true;
                 break;
             
             case PlayerStates.Tackle:
+
+                Tackle();
+
                 DebugLogger.Log("Player On Tackle State", "yellow");
                 break;
             
             case PlayerStates.Shoot:
+
+                ShootToGoal();
+
                 DebugLogger.Log("Player On Shoot State", "yellow");
                 break;
             

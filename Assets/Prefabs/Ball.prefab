@@ -124,3 +124,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b8c16e5891a8234d975a16521812c1c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BallController
+  targetTile: {fileID: 0}
+  moveDuration: 1.5
+  curveSideAmount: 1.5
+  curveHeight: 0.3

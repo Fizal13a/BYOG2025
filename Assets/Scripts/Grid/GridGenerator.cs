@@ -137,7 +137,7 @@ public class GridGenerator : MonoBehaviour
         }
     }
 
-    public void HighlightTiles(int x, int y)
+    public void HighlightPassTiles(int x, int y)
     {
 
         GridTile tile = GetTile(x, y);

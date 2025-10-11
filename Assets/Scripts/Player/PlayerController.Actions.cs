@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public partial class PlayerController : MonoBehaviour
 {
@@ -55,19 +56,54 @@ public partial class PlayerController : MonoBehaviour
             }
         }
 
-        BallController.instance.MoveBall(tile.transform);
+        BallController.instance.CurveMoveBall(currentPlayerWithBall.ballHolderPosition);
         currentSelectedPlayer = null;
         GameManager.instance.EndTurnEarly();
     }
     // --- Once the AI with ball is in the adjustment tile, Can get the ball back ---
     private void Tackle()
     {
-        currentSelectedPlayer = null;
-        GameManager.instance.EndTurnEarly();
+
+        Vector2Int playerGridPos = currentSelectedPlayer.GetGridPosition();
+        Transform playerTransform = currentSelectedPlayer.transform;
+
+        Vector2Int[] directions = new Vector2Int[]
+        {
+            new Vector2Int(1, 0),   // right
+            new Vector2Int(-1, 0),  // left
+            new Vector2Int(0, 1),   // up
+            new Vector2Int(0, -1),  // down
+            new Vector2Int(1, 1),   // top right
+            new Vector2Int(-1, 1),  // top left
+            new Vector2Int(1, -1),  // bottom right
+            new Vector2Int(-1, -1), // bottom left
+        };
+
+        foreach (var dir in directions)
+        {
+            Vector2Int checkPos = playerGridPos + dir;
+            GridTile tile = GridGenerator.instance.GetTile(checkPos.x, checkPos.y);
+
+            Vector2Int tilePos = tile.GridPosition;
+
+            if (tile != null && tilePos == GameManager.instance.GetCurrentBallPosition())
+            {
+                GameManager.instance.SetBallPosition(playerGridPos);
+                SetPlayerWithBall(currentSelectedPlayer);
+                HandleStates(PlayerStates.Move);
+            }
+        }
     }
     // --- Shoot the ball to goal ---
     private void ShootToGoal()
     {
+        Vector2Int tileIndex = GameManager.instance.playerGoalTile;
+        GridTile targetTile = GridGenerator.instance.GetTile(tileIndex.x, tileIndex.y);
+
+        Transform targetPos = targetTile.transform;
+
+        BallController.instance.CurveMoveBall(targetPos);
+
         currentSelectedPlayer = null;
         GameManager.instance.EndTurnEarly();
     }

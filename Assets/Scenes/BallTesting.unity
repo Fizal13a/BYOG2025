@@ -561,6 +561,8 @@ MonoBehaviour:
   gridParent: {fileID: 758924041}
   gameSettings: {fileID: 11400000, guid: b6e23d5285aa60f419979ab8bf2f2548, type: 2}
   highlightedTiles: []
+  allTiles: []
+  goalTile: {fileID: 0}
 --- !u!1 &665415126
 GameObject:
   m_ObjectHideFlags: 0
@@ -1010,6 +1012,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 97dd6830b4c433c438b1b67c9f62cb82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AIPlayerController
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  currentAIWithBall: {fileID: 0}
+  currentSelectedAI: {fileID: 0}
 --- !u!1 &893772079
 GameObject:
   m_ObjectHideFlags: 0
@@ -2049,7 +2056,9 @@ MonoBehaviour:
   - {x: 1, y: 7}
   - {x: 5, y: 7}
   - {x: 3, y: 6}
-  ballSpawnTile: {x: 3, y: 4}
+  ballSpawnTile: {x: 1, y: 2}
+  playerGoalTile: {x: 3, y: 8}
+  aiGoalTile: {x: 3, y: 0}
   playerController: {fileID: 1712556749}
   aiPlayerController: {fileID: 783325683}
   turnDisplayText: {fileID: 180184932}

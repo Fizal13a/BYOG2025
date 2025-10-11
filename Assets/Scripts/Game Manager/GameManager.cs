@@ -19,6 +19,8 @@ public partial class GameManager : MonoBehaviour
     public Vector2Int[] playerSpawnTiles;
     public Vector2Int[] aiSpawnTiles;
     public Vector2Int ballSpawnTile;
+    public Vector2Int playerGoalTile;
+    public Vector2Int aiGoalTile;
     
     [Header("In Game Referances")]
     public PlayerController playerController;
