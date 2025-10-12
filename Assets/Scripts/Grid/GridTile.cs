@@ -4,6 +4,7 @@ using UnityEngine;
 public class GridTile : MonoBehaviour
 {
     private bool isOccupied;
+    public GameObject occupyingEntity; // Added for AI system
     
     public Vector2Int GridPosition;
     public bool IsWalkable = true;
@@ -30,7 +31,7 @@ public class GridTile : MonoBehaviour
         GridPosition = gridPosition;
     }
     
-    public void SetIsOccupied(bool value)
+    public void SetOccupied(bool value)
     {
         isOccupied = value;
     }

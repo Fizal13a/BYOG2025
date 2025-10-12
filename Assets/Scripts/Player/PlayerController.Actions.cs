@@ -16,6 +16,9 @@ public partial class PlayerController : MonoBehaviour
     
     private IEnumerator MoveToTileRoutine(GridTile targetTile)
     {
+        GridTile currentTile = GridGenerator.instance.GetTile(currentSelectedPlayer.GetGridPosition().x, currentSelectedPlayer.GetGridPosition().y);
+        currentTile.SetOccupied(false);
+        targetTile.SetOccupied(true);
         Vector3 start = currentSelectedPlayer.transform.position;
         Vector3 end = targetTile.WorldPosition;
         end.y = start.y;
@@ -34,6 +37,11 @@ public partial class PlayerController : MonoBehaviour
         {
             SetPlayerWithBall(currentSelectedPlayer);
         }
+
+        if (currentPlayerWithBall != null && currentPlayerWithBall == currentSelectedPlayer)
+        {
+            GameManager.instance.SetBallPosition(targetTile.GridPosition);
+        }
         currentSelectedPlayer = null;
         GameManager.instance.EndTurnEarly();
     }
@@ -43,6 +51,14 @@ public partial class PlayerController : MonoBehaviour
     // --- Once the target player is selected, pass the ball to that player ---
     private void PassToPlayer(GridTile tile)
     {
+        foreach (var player in players)
+        {
+            if (player.GetGridPosition() == tile.GridPosition)
+            {
+                currentPassTargetPlayer  = player;
+                break;
+            }
+        }
         GameObject ball = GameManager.instance.GetBallObject();
         DebugLogger.Log(ball.gameObject.name, "yellow");
         ball.transform.SetParent(null);
@@ -56,10 +72,46 @@ public partial class PlayerController : MonoBehaviour
             }
         }
 
-        BallController.instance.CurveMoveBall(currentPlayerWithBall.ballHolderPosition);
+        StartCoroutine(BallPassMove(tile.transform));
+        GameManager.instance.SetBallPosition(currentPlayerWithBall.GetGridPosition());
         currentSelectedPlayer = null;
-        GameManager.instance.EndTurnEarly();
     }
+
+    IEnumerator BallPassMove(Transform targetTile)
+    {
+        if (targetTile == null)
+            yield break;
+
+        Vector3 startPos = transform.position;
+        Vector3 endPos = targetTile.position;
+
+        float elapsed = 0f;
+
+        Vector3 forwardDir = (endPos - startPos).normalized;
+        Vector3 sideDir = Vector3.Cross(Vector3.up, forwardDir); 
+
+        while (elapsed < 1)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / 1);
+
+            float smoothT = Mathf.Pow(t, 5f);
+
+            Vector3 pos = Vector3.Lerp(startPos, endPos, smoothT);
+
+            float heightOffset = Mathf.Sin(smoothT * Mathf.PI) * 0.3f;
+
+            pos.y += heightOffset + 0.3f;
+
+            transform.position = pos;
+
+            yield return null;
+        }
+
+        transform.position = new Vector3(endPos.x, endPos.y + 0.3f, endPos.z);
+        SetPlayerWithBall(currentPlayerWithBall);
+    }
+    
     // --- Once the AI with ball is in the adjustment tile, Can get the ball back ---
     private void Tackle()
     {
@@ -84,6 +136,8 @@ public partial class PlayerController : MonoBehaviour
             Vector2Int checkPos = playerGridPos + dir;
             GridTile tile = GridGenerator.instance.GetTile(checkPos.x, checkPos.y);
 
+            if(tile == null) continue;
+            
             Vector2Int tilePos = tile.GridPosition;
 
             if (tile != null && tilePos == GameManager.instance.GetCurrentBallPosition())
@@ -97,7 +151,7 @@ public partial class PlayerController : MonoBehaviour
     // --- Shoot the ball to goal ---
     private void ShootToGoal()
     {
-        Vector2Int tileIndex = GameManager.instance.playerGoalTile;
+        Vector2Int tileIndex = GameManager.instance.GetPlayerGoalTile().GridPosition;
         GridTile targetTile = GridGenerator.instance.GetTile(tileIndex.x, tileIndex.y);
 
         Transform targetPos = targetTile.transform;

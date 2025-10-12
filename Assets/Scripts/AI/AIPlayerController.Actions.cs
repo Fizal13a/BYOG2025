@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -5,7 +6,19 @@ public partial class AIPlayerController : MonoBehaviour
 {
     private void MoveToTile(AIPlayer currentplayer, GridTile tile)
     {
+        GridTile currentTile = GridGenerator.instance.GetTile(currentplayer.GetGridPosition().x, currentplayer.GetGridPosition().y);
+        if (currentTile != null)
+        {
+            currentTile.SetOccupied(false);
+            currentTile.occupyingEntity = null;
+        }
+        
+        // Move to new tile
+        currentplayer.SetGridPosition(tile.GridPosition);
+        tile.SetOccupied(true);
+        tile.occupyingEntity = currentplayer.gameObject;
         StartCoroutine(MoveToTileRoutine(currentplayer, tile));
+        DebugLogger.Log(currentplayer, "yellow");
     }
     
     private IEnumerator MoveToTileRoutine(AIPlayer currentplayer, GridTile targetTile)
@@ -30,5 +43,7 @@ public partial class AIPlayerController : MonoBehaviour
         }
         currentSelectedAI = null;
         //GameManager.instance.EndTurnEarly();
+
+        StartCoroutine(EndTurn());
     }
 }

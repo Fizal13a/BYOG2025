@@ -5,6 +5,7 @@ using UnityEngine.EventSystems;
 
 public partial class PlayerController : MonoBehaviour
 {
+    public static PlayerController instance;
     public enum PlayerStates
     {
         Move, Pass, Tackle, Shoot, Dash
@@ -22,11 +23,25 @@ public partial class PlayerController : MonoBehaviour
     private Player currentSelectedPlayer;
     private Player targetSelectedPlayer;
     public  Player currentPlayerWithBall;
+    public Player currentPassTargetPlayer;
     private PlayerStates currentState;
     
     private bool isPlayerTurn = false;
 
     #region Initialization
+
+    private void OnEnable()
+    {
+        BallController.OnBallReached += (() => SetPlayerWithBall(currentPassTargetPlayer));
+    }
+
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+    }
 
     public void SetUpPlayers()
     {
@@ -50,15 +65,20 @@ public partial class PlayerController : MonoBehaviour
     public void SetUpTurn(bool turn)
     {
         isPlayerTurn = turn;
+        DebugLogger.Log("Setting player turn " + isPlayerTurn);
     }
 
     public void SetPlayerWithBall(Player player)
     {
+        if(!isPlayerTurn) return;
+        
         GameObject ball = GameManager.instance.GetBallObject();
         DebugLogger.Log(ball.gameObject.name + ", " + player.gameObject.name, "yellow");
         ball.transform.SetParent(player.ballHolderPosition);
         ball.transform.localPosition = Vector3.zero;
         currentPlayerWithBall = player;
+
+        currentPassTargetPlayer = null;
     }
 
     #endregion

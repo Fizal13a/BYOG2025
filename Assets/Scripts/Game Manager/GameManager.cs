@@ -19,8 +19,8 @@ public partial class GameManager : MonoBehaviour
     public Vector2Int[] playerSpawnTiles;
     public Vector2Int[] aiSpawnTiles;
     public Vector2Int ballSpawnTile;
-    public Vector2Int playerGoalTile;
-    public Vector2Int aiGoalTile;
+    public Vector2Int playerGoalTilePos;
+    public Vector2Int aiGoalTilePos;
     
     [Header("In Game Referances")]
     public PlayerController playerController;
@@ -35,6 +35,9 @@ public partial class GameManager : MonoBehaviour
     private Player currentPlayerWithBall;
     private AIPlayer currentAIWithBall;
     private Vector2Int currentBallPosition;
+
+    private GridTile platerGoalTile;
+    private GridTile aiGoalTile;
 
     #region Initialization
 
@@ -81,7 +84,7 @@ public partial class GameManager : MonoBehaviour
             }
             
             GridTile tileScript = GridGenerator.instance.GetTile(gridPos.x, gridPos.y);
-            tileScript.SetIsOccupied(true);
+            tileScript.SetOccupied(true);
         }
 
         // --- Spawn AI ---
@@ -101,7 +104,7 @@ public partial class GameManager : MonoBehaviour
             }
             
             GridTile tileScript = GridGenerator.instance.GetTile(gridPos.x, gridPos.y);
-            tileScript.SetIsOccupied(true);
+            tileScript.SetOccupied(true);
         }
 
         // --- Spawn Ball ---
@@ -113,9 +116,6 @@ public partial class GameManager : MonoBehaviour
             ball.name = "Ball";
             SetBallPosition(ballSpawnTile);
         }
-        
-        GridTile ballTileScript = GridGenerator.instance.GetTile(ballSpawnTile.x, ballSpawnTile.y);
-        ballTileScript.SetIsOccupied(true);
         
         // --- Start State --- 
         StartPlayerTurn();
@@ -145,6 +145,16 @@ public partial class GameManager : MonoBehaviour
         return ball;
     }
 
+    public GridTile GetPlayerGoalTile()
+    {
+        return platerGoalTile;
+    }
+
+    public GridTile GetAIGoalTile()
+    {
+        return aiGoalTile;
+    }
+
     #endregion
 
     #region Setters
@@ -162,6 +172,16 @@ public partial class GameManager : MonoBehaviour
     public void SetBallPosition(Vector2Int position)
     {
         currentBallPosition = position;
+    }
+
+    public void SetPlayerGoalTile(GridTile tile)
+    {
+        platerGoalTile = tile;
+    }
+
+    public void SetAIGoalTile(GridTile tile)
+    {
+        aiGoalTile = tile;
     }
 
     #endregion

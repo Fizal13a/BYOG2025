@@ -61,10 +61,22 @@ public class GridGenerator : MonoBehaviour
                 gridTiles[x, y] = tileScript;
                 tileScript.SetGridPosition(new Vector2Int(x,y));
 
+                if (GameManager.instance.playerGoalTilePos == new Vector2Int(x, y))
+                {
+                    GameManager.instance.SetPlayerGoalTile(tileScript);
+                }
+                
+                if (GameManager.instance.aiGoalTilePos == new Vector2Int(x, y))
+                {
+                    GameManager.instance.SetAIGoalTile(tileScript);
+                }
+
                 // Store in array
                 grid[x, y] = tile;
             }
         }
+
+        SetTileNeighbors();
     }
 
     #endregion
@@ -115,10 +127,6 @@ public class GridGenerator : MonoBehaviour
             new Vector2Int(-1, 0),  // left
             new Vector2Int(0, 1),   // up
             new Vector2Int(0, -1),  // down
-            new Vector2Int(2, 0),   // 2 right
-            new Vector2Int(-2, 0),  // 2 left
-            new Vector2Int(0, 2),   // 2 up
-            new Vector2Int(0, -2),  // 2 down
             new Vector2Int(1, 1),   // top right
             new Vector2Int(-1, 1),  // top left
             new Vector2Int(1, -1),  // bottom right
@@ -129,7 +137,7 @@ public class GridGenerator : MonoBehaviour
         {
             Vector2Int checkPos = playerGridPos + dir;
             GridTile tile = GetTile(checkPos.x, checkPos.y);
-            if (tile != null && tile.IsWalkable)
+            if (tile != null && !tile.IsOccupied())
             {
                 tile.Highlight(true);
                 highlightedTiles.Add(tile);
@@ -252,6 +260,39 @@ public class GridGenerator : MonoBehaviour
             return 14 * dstY + 10 * (dstX - dstY);
         return 14 * dstX + 10 * (dstY - dstX);
     }
+    
+    public void SetTileNeighbors()
+    {
+        foreach (GridTile tile in allTiles)
+        {
+            tile.neighbors.Clear();
+
+            for (int x = -1; x <= 1; x++)
+            {
+                for (int y = -1; y <= 1; y++)
+                {
+                    if (x == 0 && y == 0)
+                        continue;
+
+                    int checkX = tile.GridPosition.x + x;
+                    int checkY = tile.GridPosition.y + y;
+
+                    // Make sure within grid bounds
+                    if (checkX >= 0 && checkY >= 0 && checkX < gameSettings.gridWidth && checkY < gameSettings.gridWidth)
+                    {
+                        GridTile neighbor = gridTiles[checkX, checkY];
+                        if (neighbor != null && neighbor.IsWalkable)
+                        {
+                            tile.neighbors.Add(neighbor);
+                        }
+                    }
+                }
+            }
+        }
+
+        DebugLogger.Log("✅ Tile neighbors successfully assigned!", "green");
+    }
+
 
     #endregion
    

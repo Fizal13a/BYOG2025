@@ -40,6 +40,7 @@ public partial class GameManager : MonoBehaviour
     // --- Wait State --- 
     IEnumerator WaitAndStartNextTurn(GameSettings.GameState nextState)
     {
+        DebugLogger.Log("WaitAndStartNextTurn", "orange");
         float currentTime = gameSettings.turnDuration;
 
         while (currentTime > 0)
@@ -66,13 +67,11 @@ public partial class GameManager : MonoBehaviour
         if (turnRoutine != null)
         {
             StopCoroutine(turnRoutine);
-
             if (currentState == GameSettings.GameState.PlayerTurn)
                 StartAITurn();
             else if (currentState == GameSettings.GameState.AITurn)
                 StartPlayerTurn();
-            
-            DebugLogger.Log("End turn", "red");
         }
+         
     }
 }

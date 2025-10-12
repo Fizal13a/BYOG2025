@@ -1,9 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using UnityEngine;
 
 public class BallController : MonoBehaviour
 {
     public static BallController instance;
+
+    public static Action OnBallReached;
 
     [Header("Target")]
     public Transform targetTile;
@@ -66,6 +69,9 @@ public class BallController : MonoBehaviour
         }
 
         transform.position = new Vector3(endPos.x, endPos.y + 0.3f, endPos.z);
+       OnBallReached?.Invoke();
+        
         ballMoveCoroutine = null;
+        
     }
 }

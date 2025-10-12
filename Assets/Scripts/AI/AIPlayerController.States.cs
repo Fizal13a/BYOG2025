@@ -7,18 +7,7 @@ public partial class AIPlayerController : MonoBehaviour
         switch (state)
         {
             case AIStates.Move:
-                DebugLogger.Log("AI On Move State", "yellow");
-                GridTile targetTile;
-                if (currentAIWithBall != null)
-                {
-                    targetTile = GetNextTileTowardGoal(currentAIWithBall);
-                    MoveToTile(currentAIWithBall, targetTile);
-                }
-                else
-                {
-                    targetTile = GetNextTileTowardBall(currentSelectedAI);
-                    MoveToTile(currentSelectedAI, targetTile);
-                }
+             
                 break;
             
             case AIStates.Pass:

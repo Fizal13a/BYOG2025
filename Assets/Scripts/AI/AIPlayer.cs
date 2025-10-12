@@ -6,7 +6,7 @@ public class AIPlayer : MonoBehaviour
     public Transform ballHolderPosition;
     
     [Header("Stats")]
-    private float moveSpeed = 5f;
+    private float moveSpeed = 2f;
     
     [Header("Grid Data")] 
     private Vector2Int GridPosition;
