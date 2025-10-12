@@ -2727,8 +2727,8 @@ MonoBehaviour:
   - {x: 5, y: 7}
   - {x: 3, y: 6}
   ballSpawnTile: {x: 1, y: 2}
-  playerGoalTilePos: {x: 0, y: 0}
-  aiGoalTilePos: {x: 0, y: 0}
+  playerGoalTilePos: {x: 3, y: 0}
+  aiGoalTilePos: {x: 3, y: 8}
   playerController: {fileID: 1712556749}
   aiPlayerController: {fileID: 783325683}
   turnDisplayText: {fileID: 180184932}
@@ -2871,6 +2871,8 @@ MonoBehaviour:
   - name: shootsfx
     clip: {fileID: 8300000, guid: 4be94149e0d36344ea1304e463573aba, type: 3}
   - name: goalsfx
+    clip: {fileID: 8300000, guid: 237ad13d6a5ce9f49a52f5e9b6ec6a4f, type: 3}
+  - name: crowdsfx
     clip: {fileID: 8300000, guid: 237ad13d6a5ce9f49a52f5e9b6ec6a4f, type: 3}
   backgroundMusic: {fileID: 0}
 --- !u!1 &1654631574

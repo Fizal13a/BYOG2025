@@ -280,8 +280,7 @@ public partial class AIPlayerController : MonoBehaviour
             Debug.Log($"{currentAIWithBall.name} shooting at goal");
             GameObject ball = GameManager.instance.GetBallObject();
             Transform goalTile = GameManager.instance.GetAIGoalTile().transform;
-            StartCoroutine(MoveBallToShoot(ball, goalTile));
-           
+            StartCoroutine(MoveBallToShoot(ball.transform, new Vector3(goalTile.position.x,goalTile.position.y,goalTile.position.z)));
         }
     }
     

@@ -37,7 +37,7 @@ public partial class GameManager : MonoBehaviour
     private AIPlayer currentAIWithBall;
     private Vector2Int currentBallPosition;
 
-    private GridTile platerGoalTile;
+    private GridTile playerGoalTile;
     private GridTile aiGoalTile;
 
     private string scoredTeam = null;
@@ -168,7 +168,7 @@ public partial class GameManager : MonoBehaviour
 
     public GridTile GetPlayerGoalTile()
     {
-        return platerGoalTile;
+        return playerGoalTile;
     }
 
     public GridTile GetAIGoalTile()
@@ -197,7 +197,7 @@ public partial class GameManager : MonoBehaviour
 
     public void SetPlayerGoalTile(GridTile tile)
     {
-        platerGoalTile = tile;
+        playerGoalTile = tile;
     }
 
     public void SetAIGoalTile(GridTile tile)
