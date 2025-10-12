@@ -40,6 +40,8 @@ public partial class GameManager : MonoBehaviour
     private GridTile platerGoalTile;
     private GridTile aiGoalTile;
 
+    private string scoredTeam = null;
+
     #region Initialization
 
     private void Awake()
@@ -133,7 +135,10 @@ public partial class GameManager : MonoBehaviour
             playerController.SetPlayerWithBall(player);
             StartPlayerTurn();
         }
-        
+    }
+
+    private void ResetRoundPositions()
+    {
         
     }
 
@@ -201,5 +206,14 @@ public partial class GameManager : MonoBehaviour
     }
 
     #endregion
-   
+
+    public void SetScored(string team)
+    {
+        scoredTeam = team;
+    }
+
+    public void ResetRound()
+    {
+        InitializeMatch();
+    }
 }

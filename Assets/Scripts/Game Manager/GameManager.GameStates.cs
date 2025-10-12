@@ -73,4 +73,12 @@ public partial class GameManager : MonoBehaviour
                 StartPlayerTurn();
         }
     }
+
+    public void StopTurns()
+    {
+        if (turnRoutine != null)
+        {
+            StopCoroutine(turnRoutine);
+        }
+    }
 }

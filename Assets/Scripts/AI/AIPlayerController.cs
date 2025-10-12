@@ -278,9 +278,46 @@ public partial class AIPlayerController : MonoBehaviour
         if (currentAIWithBall != null)
         {
             Debug.Log($"{currentAIWithBall.name} shooting at goal");
-            // Implement shoot logic here
-            StartCoroutine(EndTurn());
+            GameObject ball = GameManager.instance.GetBallObject();
+            Transform goalTile = GameManager.instance.GetAIGoalTile().transform;
+            StartCoroutine(MoveBallToShoot(ball, goalTile));
+           
         }
+    }
+    
+    public IEnumerator MoveBallToShoot(Transform ball, Vector3 targetPosition, float arcHeight = 2f, float duration = 1f)
+    {
+        DebugLogger.Log("Moving ball to target", "red");
+        Vector3 startPos = ball.transform.position;
+        Vector3 endPos = targetPosition;
+
+        float elapsed = 0f;
+
+        Vector3 forwardDir = (endPos - startPos).normalized;
+        Vector3 sideDir = Vector3.Cross(Vector3.up, forwardDir); 
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+
+            float smoothT = Mathf.Pow(t, 5f);
+
+            Vector3 pos = Vector3.Lerp(startPos, endPos, smoothT);
+
+            float heightOffset = Mathf.Sin(smoothT * Mathf.PI) * arcHeight;
+            
+            pos.y += heightOffset + 0.3f;
+
+            ball.position = pos;
+
+            yield return null;
+        }
+
+        ball.position = targetPosition;
+        UIManager.instance.AddAIScore(1);
+        StartCoroutine(ResetRound());
+        // Ensure we end exactly at target
     }
     
     // Helper methods
@@ -440,5 +477,10 @@ public partial class AIPlayerController : MonoBehaviour
     {
         yield return new WaitForSeconds(0.5f);
         ExecuteState(AIStates.Pass);
+    }
+
+    IEnumerator ResetRound()
+    {
+        yield return new WaitForSeconds(1f);
     }
 }

@@ -171,7 +171,7 @@ public partial class PlayerController : MonoBehaviour
         }
 
         ball.transform.position = new Vector3(endPos.x, endPos.y + 0.3f, endPos.z);
-       
+        UIManager.instance.AddPlayerScore(1);
     }
     
     // --- Pass to a player and move at the same time ---
