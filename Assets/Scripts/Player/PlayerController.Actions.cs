@@ -82,7 +82,9 @@ public partial class PlayerController : MonoBehaviour
         if (targetTile == null)
             yield break;
 
-        Vector3 startPos = transform.position;
+        GameObject ball = GameManager.instance.GetBallObject();
+        
+        Vector3 startPos = ball.transform.position;
         Vector3 endPos = targetTile.position;
 
         float elapsed = 0f;
@@ -103,12 +105,12 @@ public partial class PlayerController : MonoBehaviour
 
             pos.y += heightOffset + 0.3f;
 
-            transform.position = pos;
+            ball.transform.position = pos;
 
             yield return null;
         }
 
-        transform.position = new Vector3(endPos.x, endPos.y + 0.3f, endPos.z);
+        ball.transform.position = new Vector3(endPos.x, endPos.y + 0.3f, endPos.z);
         SetPlayerWithBall(currentPlayerWithBall);
     }
     
