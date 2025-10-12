@@ -70,8 +70,6 @@ public partial class PlayerController : MonoBehaviour
 
     public void SetPlayerWithBall(Player player)
     {
-        if(!isPlayerTurn) return;
-        
         GameObject ball = GameManager.instance.GetBallObject();
         DebugLogger.Log(ball.gameObject.name + ", " + player.gameObject.name, "yellow");
         ball.transform.SetParent(player.ballHolderPosition);

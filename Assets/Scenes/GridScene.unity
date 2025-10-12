@@ -1018,7 +1018,6 @@ MonoBehaviour:
   currentAIWithBall: {fileID: 0}
   currentSelectedAI: {fileID: 0}
   currentPassTargetAI: {fileID: 0}
-  ball: {fileID: 0}
   goalTile: {fileID: 0}
 --- !u!1 &893772079
 GameObject:
@@ -2052,16 +2051,16 @@ MonoBehaviour:
   playersParent: {fileID: 1712556748}
   aisParent: {fileID: 783325682}
   playerSpawnTiles:
+  - {x: 3, y: 2}
   - {x: 1, y: 1}
   - {x: 5, y: 1}
-  - {x: 3, y: 2}
   aiSpawnTiles:
+  - {x: 3, y: 6}
   - {x: 1, y: 7}
   - {x: 5, y: 7}
-  - {x: 3, y: 6}
   ballSpawnTile: {x: 3, y: 4}
-  playerGoalTile: {x: 3, y: 8}
-  aiGoalTile: {x: 3, y: 0}
+  playerGoalTilePos: {x: 3, y: 0}
+  aiGoalTilePos: {x: 3, y: 8}
   playerController: {fileID: 1712556749}
   aiPlayerController: {fileID: 783325683}
   turnDisplayText: {fileID: 180184932}

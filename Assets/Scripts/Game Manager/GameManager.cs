@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public partial class GameManager : MonoBehaviour
 {
@@ -116,9 +117,24 @@ public partial class GameManager : MonoBehaviour
             ball.name = "Ball";
             SetBallPosition(ballSpawnTile);
         }
+
+        int randomTurn = Random.Range(0, 10);
+        if (randomTurn > 5)
+        {
+            // --- Start State --- 
+            AIPlayer ai = aiPlayers[0].GetComponent<AIPlayer>();
+            aiPlayerController.SetPlayerWithBall(ai);
+            StartAITurn();
+        }
+        else
+        {
+            // --- Start State --- 
+            Player player = players[0].GetComponent<Player>();
+            playerController.SetPlayerWithBall(player);
+            StartPlayerTurn();
+        }
         
-        // --- Start State --- 
-        StartPlayerTurn();
+        
     }
 
     #endregion

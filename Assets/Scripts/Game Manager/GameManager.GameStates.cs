@@ -72,6 +72,5 @@ public partial class GameManager : MonoBehaviour
             else if (currentState == GameSettings.GameState.AITurn)
                 StartPlayerTurn();
         }
-         
     }
 }

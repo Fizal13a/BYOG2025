@@ -178,6 +178,8 @@ public partial class AIPlayerController : MonoBehaviour
             if (nextTile != null)
             {
                 MoveToTile(currentAIWithBall, nextTile);
+                GameManager.instance.SetBallPosition(nextTile.GridPosition);
+                
             }
             else
             {
@@ -255,10 +257,10 @@ public partial class AIPlayerController : MonoBehaviour
             yield return null;
         }
 
+        ball.position = targetPosition;
         SetPlayerWithBall(currentPassTargetAI);
         StartCoroutine(EndTurn());
         // Ensure we end exactly at target
-        ball.position = targetPosition;
     }
     
     private void ExecuteTackle()
@@ -358,10 +360,20 @@ public partial class AIPlayerController : MonoBehaviour
         {
             if (ai == null || ai == currentAIWithBall) continue;
             
+            // Skip if this AI has enemies nearby (within 2 tiles)
+            if (AreEnemiesNearby(ai, 2))
+            {
+                Debug.Log($"Skipping {ai.name} as pass target - enemies nearby");
+                continue;
+            }
+            
             // Calculate score based on distance to goal and being open
             GridTile aiTile = GridGenerator.instance.GetTile(ai.GetGridPosition().x, ai.GetGridPosition().y);
             int distToGoal = GetTileDistance(aiTile, goalTile);
             int score = 100 - distToGoal; // Closer to goal = better
+            
+            // Bonus for being in open space
+            score += 20;
             
             if (score > bestScore)
             {
