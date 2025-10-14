@@ -1,14 +1,19 @@
+using System;
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public partial class GameManager : MonoBehaviour
 {
     [Header("Runtime Info")]
     public GameSettings.GameState currentState;
     private Coroutine turnRoutine;
+
+    private Coroutine stateDelayRoutine;
     
     // --- Player Turn --- 
-    void StartPlayerTurn()
+    private void StartPlayerTurn()
     {
         currentState = GameSettings.GameState.PlayerTurn;
         SetTurnDisplayText(currentState.ToString());
@@ -23,7 +28,7 @@ public partial class GameManager : MonoBehaviour
     }
 
     // --- AI Turn --- 
-    void StartAITurn()
+    private void StartAITurn()
     {
         Debug.Log("AI Turn Started");
         currentState = GameSettings.GameState.AITurn;
@@ -34,6 +39,7 @@ public partial class GameManager : MonoBehaviour
 
         if (turnRoutine != null) StopCoroutine(turnRoutine);
         turnRoutine = StartCoroutine(WaitAndStartNextTurn(GameSettings.GameState.PlayerTurn));
+        
         GridGenerator.instance.ClearHighlightedTiles();
     }
 
@@ -73,8 +79,8 @@ public partial class GameManager : MonoBehaviour
                 StartPlayerTurn();
         }
     }
-
-    public void StopTurns()
+    
+    public void StopAllTurns()
     {
         if (turnRoutine != null)
         {

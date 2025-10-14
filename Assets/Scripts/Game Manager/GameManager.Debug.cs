@@ -5,7 +5,6 @@ public partial class GameManager : MonoBehaviour
 {
     [Header("Debug")] 
     public TextMeshProUGUI turnDisplayText;
-
     public TextMeshProUGUI turnTimerText;
 
     private void SetTurnDisplayText(string turn)

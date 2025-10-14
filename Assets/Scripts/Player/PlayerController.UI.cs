@@ -4,15 +4,15 @@ using UnityEngine.UI;
 public partial class PlayerController : MonoBehaviour
 {
     [Header("UI")]
-    public GameObject playerUIPanel;
+    [SerializeField] private GameObject playerUIPanel;
+
     #region Buttons
-    public Button moveButton;
-    public Button passButton;
-    public Button tackleButton;
-    public Button shootButton;
-    public Button dashButton;
+    [SerializeField] private Button moveButton;
+    [SerializeField] private Button passButton;
+    [SerializeField] private Button tackleButton;
+    [SerializeField] private Button shootButton;
+    [SerializeField] private Button dashButton;
     #endregion
-  
 
     #region Initialization
 
@@ -28,100 +28,86 @@ public partial class PlayerController : MonoBehaviour
         tackleButton.onClick.RemoveAllListeners();
         shootButton.onClick.RemoveAllListeners();
         dashButton.onClick.RemoveAllListeners();
-        
-        moveButton.onClick.AddListener( (() => {HandleStates(PlayerStates.Move);}));
-        passButton.onClick.AddListener( (() => {HandleStates(PlayerStates.Pass);}));
-        tackleButton.onClick.AddListener( (() => {HandleStates(PlayerStates.Tackle);}));
-        shootButton.onClick.AddListener( (() => {HandleStates(PlayerStates.Shoot);}));
-        dashButton.onClick.AddListener( (() => {HandleStates(PlayerStates.Dash);}));
+
+        moveButton.onClick.AddListener(() => HandleStates(PlayerStates.Move));
+        passButton.onClick.AddListener(() => HandleStates(PlayerStates.Pass));
+        tackleButton.onClick.AddListener(() => HandleStates(PlayerStates.Tackle));
+        shootButton.onClick.AddListener(() => HandleStates(PlayerStates.Shoot));
+        dashButton.onClick.AddListener(() => HandleStates(PlayerStates.Dash));
     }
-    
+
     #endregion
+
+    #region UI Control
 
     private void ToggleUI(bool state)
     {
+        // Enable/disable UI
+        playerUIPanel.SetActive(state);
+
+        // Default button states
         moveButton.interactable = true;
         passButton.interactable = true;
         tackleButton.interactable = true;
         shootButton.interactable = true;
         dashButton.interactable = false;
-        
-        playerUIPanel.SetActive(state);
-        
+
+        if (currentSelectedPlayer == null) return;
+
         Vector2Int playerGridPos = currentSelectedPlayer.GetGridPosition();
-        Transform playerTransform = currentSelectedPlayer.transform;
 
-        Vector2Int[] tackledirections = new Vector2Int[]
-        {
-            new Vector2Int(1, 0),   // right
-            new Vector2Int(-1, 0),  // left
-            new Vector2Int(0, 1),   // up
-            new Vector2Int(0, -1),  // down
-            new Vector2Int(1, 1),   // top right
-            new Vector2Int(-1, 1),  // top left
-            new Vector2Int(1, -1),  // bottom right
-            new Vector2Int(-1, -1), // bottom left
-        };
-        
-        Vector2Int[] goaldirections = new Vector2Int[]
-        {
-            new Vector2Int(1, 0),   // right
-            new Vector2Int(-1, 0),  // left
-            new Vector2Int(0, 1),   // up
-            new Vector2Int(0, -1),  // down
-            new Vector2Int(1, 1),   // top right
-            new Vector2Int(-1, 1),  // top left
-            new Vector2Int(1, -1),  // bottom right
-            new Vector2Int(-1, -1), // bottom left
-            new Vector2Int(2, 0),   // right
-            new Vector2Int(-2, 0),  // left
-            new Vector2Int(0, 2),   // up
-            new Vector2Int(0, -2),  // down
-            new Vector2Int(2, 2),   // top right
-            new Vector2Int(-2, 2),  // top left
-            new Vector2Int(2, -2),  // bottom right
-            new Vector2Int(-2, -2), // bottom left
-        };
+        // Disable tackle button if player with ball exists nearby
+        if (currentPlayerWithBall != null || IsBallAdjacent(playerGridPos))
+            tackleButton.interactable = false;
 
-        foreach (var dir in tackledirections)
-        {
-            if (currentPlayerWithBall != null)
-            {
-                tackleButton.interactable = false;
-                break;
-            }
-            
-            Vector2Int checkPos = playerGridPos + dir;
-            GridTile tile = GridGenerator.instance.GetTile(checkPos.x, checkPos.y);
-
-            if(tile == null) continue;
-            
-            Vector2Int tilePos = tile.GridPosition;
-
-            if (tile != null && tilePos == GameManager.instance.GetCurrentBallPosition())
-            {
-                tackleButton.interactable = false;
-            }
-        }
-        foreach (var dir in goaldirections)
-        {
-            if (currentPlayerWithBall == null)
-            {
-                shootButton.interactable = false;
-                break;
-            }
-            
-            Vector2Int checkPos = playerGridPos + dir;
-            GridTile tile = GridGenerator.instance.GetTile(checkPos.x, checkPos.y);
-
-            if(tile == null) continue;
-            
-            Vector2Int tilePos = tile.GridPosition;
-
-            if (tile != null && tilePos == GameManager.instance.GetPlayerGoalTile().GridPosition)
-            {
-                shootButton.interactable = false;
-            }
-        }
+        // Disable shoot button if player doesn't have ball or near goal
+        //if (currentPlayerWithBall == null || IsNearGoal(playerGridPos))
+            //shootButton.interactable = false;
     }
+
+    private bool IsBallAdjacent(Vector2Int playerGridPos)
+    {
+        Vector2Int[] directions =
+        {
+            new(1, 0), new(-1, 0), new(0, 1), new(0, -1),
+            new(1, 1), new(-1, 1), new(1, -1), new(-1, -1)
+        };
+
+        foreach (var dir in directions)
+        {
+            GridTile tile = GridGenerator.instance.GetTile(playerGridPos.x + dir.x, playerGridPos.y + dir.y);
+            if (tile == null) continue;
+
+            if (tile.GridPosition == GameManager.instance.GetCurrentBallPosition())
+                return true;
+        }
+
+        return false;
+    }
+
+    private bool IsNearGoal(Vector2Int playerGridPos)
+    {
+        Vector2Int[] directions =
+        {
+            new(1, 0), new(-1, 0), new(0, 1), new(0, -1),
+            new(1, 1), new(-1, 1), new(1, -1), new(-1, -1),
+            new(2, 0), new(-2, 0), new(0, 2), new(0, -2),
+            new(2, 2), new(-2, 2), new(2, -2), new(-2, -2)
+        };
+
+        Vector2Int goalPos = GameManager.instance.GetPlayerGoalTile().GridPosition;
+
+        foreach (var dir in directions)
+        {
+            GridTile tile = GridGenerator.instance.GetTile(playerGridPos.x + dir.x, playerGridPos.y + dir.y);
+            if (tile == null) continue;
+
+            if (tile.GridPosition == goalPos)
+                return true;
+        }
+
+        return false;
+    }
+
+    #endregion
 }

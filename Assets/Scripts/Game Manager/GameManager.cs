@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using System.Collections;
 using Random = UnityEngine.Random;
 
 public partial class GameManager : MonoBehaviour
@@ -120,6 +121,12 @@ public partial class GameManager : MonoBehaviour
             SetBallPosition(ballSpawnTile);
         }
 
+        StartCoroutine(StartGameDelay());
+    }
+
+    IEnumerator StartGameDelay()
+    {
+        yield return new WaitForSeconds(2f);
         int randomTurn = Random.Range(0, 10);
         if (randomTurn > 5)
         {
@@ -135,11 +142,6 @@ public partial class GameManager : MonoBehaviour
             playerController.SetPlayerWithBall(player);
             StartPlayerTurn();
         }
-    }
-
-    private void ResetRoundPositions()
-    {
-        
     }
 
     #endregion
@@ -204,16 +206,60 @@ public partial class GameManager : MonoBehaviour
     {
         aiGoalTile = tile;
     }
-
-    #endregion
-
+    
     public void SetScored(string team)
     {
         scoredTeam = team;
     }
 
+    #endregion
+
+    #region Reset
+
     public void ResetRound()
     {
-        InitializeMatch();
+        StartCoroutine(DelayForReset());
+        StopAllTurns();
     }
+
+    IEnumerator DelayForReset()
+    {
+        yield return new WaitForSeconds(3f);
+        ResetMatch();
+    }
+
+    public void ResetMatch()
+    {
+        for (int i = 0; i < playerSpawnTiles.Length; i++)
+        {
+            float yPos = players[i].transform.position.y;
+            players[i].transform.position = new Vector3(playerSpawnTiles[i].x, yPos, playerSpawnTiles[i].y);
+            
+            aiPlayers[i].transform.position = new Vector3(aiSpawnTiles[i].x, yPos, aiSpawnTiles[i].y);
+        }
+
+        if (scoredTeam == "Player")
+        {
+            SetBallPosition(playerSpawnTiles[0]);
+            Player player = players[0].GetComponent<Player>();
+            playerController.SetPlayerWithBall(player);
+            StartCoroutine(DelayForTurn(StartPlayerTurn));
+        }
+        else
+        {
+            SetBallPosition(aiSpawnTiles[0]);
+            AIPlayer ai = aiPlayers[0].GetComponent<AIPlayer>();
+            aiPlayerController.SetPlayerWithBall(ai);
+            StartCoroutine(DelayForTurn(StartAITurn));
+        }
+    }
+
+    IEnumerator DelayForTurn(Action turn)
+    {
+        yield return new WaitForSeconds(3f);
+        turn();
+    }
+    #endregion
+
+   
 }

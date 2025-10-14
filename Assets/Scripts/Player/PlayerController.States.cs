@@ -17,14 +17,12 @@ public partial class PlayerController : MonoBehaviour
                 break;
             
             case PlayerStates.Pass:
-
                 foreach(var player in players)
                 {
                     if (player == currentPlayerWithBall)
                         continue;
 
                     Vector2Int positionIndex = player.GetGridPosition();
-
                     GridGenerator.instance.HighlightPassTiles(positionIndex.x, positionIndex.y);
                 }
                 DebugLogger.Log("Player On Pass State", "yellow");
@@ -32,16 +30,12 @@ public partial class PlayerController : MonoBehaviour
                 break;
             
             case PlayerStates.Tackle:
-
                 Tackle();
-
                 DebugLogger.Log("Player On Tackle State", "yellow");
                 break;
             
             case PlayerStates.Shoot:
-
                 ShootToGoal();
-
                 DebugLogger.Log("Player On Shoot State", "yellow");
                 break;
             

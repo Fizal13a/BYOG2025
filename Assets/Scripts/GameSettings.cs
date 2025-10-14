@@ -5,10 +5,14 @@ public class GameSettings : ScriptableObject
 {
     public enum GameState
     {
+        MatchStart,
         PlayerTurn,
+        Waiting,
         AITurn,
-        Waiting
+        ResetMatch,
+        MatchEnd
     }
+    
     [Header("Game Settings")]
     public float turnDuration = 5f;
     

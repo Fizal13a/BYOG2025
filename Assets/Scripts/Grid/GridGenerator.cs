@@ -147,7 +147,6 @@ public class GridGenerator : MonoBehaviour
 
     public void HighlightPassTiles(int x, int y)
     {
-
         GridTile tile = GetTile(x, y);
         if (tile != null && tile.IsWalkable)
         {

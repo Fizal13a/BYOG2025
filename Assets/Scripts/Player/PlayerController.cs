@@ -21,7 +21,6 @@ public partial class PlayerController : MonoBehaviour
     
     [Header("Turn Data")]
     private Player currentSelectedPlayer;
-    private Player targetSelectedPlayer;
     public  Player currentPlayerWithBall;
     public Player currentPassTargetPlayer;
     private PlayerStates currentState;
@@ -29,12 +28,7 @@ public partial class PlayerController : MonoBehaviour
     private bool isPlayerTurn = false;
 
     #region Initialization
-
-    private void OnEnable()
-    {
-        BallController.OnBallReached += (() => SetPlayerWithBall(currentPassTargetPlayer));
-    }
-
+    
     private void Awake()
     {
         if (instance == null)
@@ -42,17 +36,17 @@ public partial class PlayerController : MonoBehaviour
             instance = this;
         }
     }
+    
+    #endregion
+
+    #region Setters
 
     public void SetUpPlayers()
     {
         players = new Player[3];
         SetUpUI();
     }
-
-    #endregion
-
-    #region Setters
-
+    
     public void AddPlayer(Player player, Vector2Int gridPos, int index)
     {
         if(index<3)
@@ -85,13 +79,14 @@ public partial class PlayerController : MonoBehaviour
     {
         if(!isPlayerTurn) return;
 
+        // --- Raycast to select target for pass or move --- 
         if (canSelect)
         {
             HandleActionSelection();
             return;
         }
 
-        // --- Raycast ---
+        // --- Raycast to select the player ---
         HandlePlayerSelection();
     }
     

@@ -315,7 +315,7 @@ public partial class AIPlayerController : MonoBehaviour
 
         ball.position = targetPosition;
         UIManager.instance.AddAIScore(1);
-        StartCoroutine(ResetRound());
+        GameManager.instance.ResetRound();
         // Ensure we end exactly at target
     }
     
