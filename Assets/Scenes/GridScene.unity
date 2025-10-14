@@ -2254,8 +2254,8 @@ MonoBehaviour:
   - {x: 1, y: 7}
   - {x: 5, y: 7}
   ballSpawnTile: {x: 3, y: 4}
-  playerGoalTilePos: {x: 3, y: 0}
-  aiGoalTilePos: {x: 3, y: 8}
+  aiTeamGoalPos: {x: 3, y: 0}
+  playerTeamGoalPos: {x: 3, y: 8}
   playerController: {fileID: 1712556749}
   aiPlayerController: {fileID: 783325683}
   turnDisplayText: {fileID: 1921553497}

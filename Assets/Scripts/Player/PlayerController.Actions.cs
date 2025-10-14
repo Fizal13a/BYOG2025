@@ -12,6 +12,8 @@ public partial class PlayerController : MonoBehaviour
     {
         DebugLogger.Log($"Moving to tile {targetTile.gameObject.name}");
         StartCoroutine(MoveToTileRoutine(targetTile));
+        
+        ToggleUI(false);
     }
     
     private IEnumerator MoveToTileRoutine(GridTile targetTile)
@@ -73,6 +75,8 @@ public partial class PlayerController : MonoBehaviour
         StartCoroutine(BallPassMove(tile.transform));
         GameManager.instance.SetBallPosition(currentPlayerWithBall.GetGridPosition());
         currentSelectedPlayer = null;
+        
+        ToggleUI(false);
     }
 
     IEnumerator BallPassMove(Transform targetTile)
@@ -125,6 +129,8 @@ public partial class PlayerController : MonoBehaviour
         GameManager.instance.SetBallPosition(playerGridPos);
         SetPlayerWithBall(currentSelectedPlayer);
         HandleStates(PlayerStates.Move);
+        
+        ToggleUI(false);
     }
 
     #endregion
@@ -143,6 +149,8 @@ public partial class PlayerController : MonoBehaviour
         StartCoroutine(BallShootToGaoal(targetTile.transform));
 
         currentSelectedPlayer = null;
+        
+        ToggleUI(false);
     }
     
     IEnumerator BallShootToGaoal(Transform targetTile)

@@ -105,8 +105,6 @@ public partial class PlayerController : MonoBehaviour
                 Player player = hit.collider.GetComponent<Player>();
                 if (player != null)
                 {
-                    GridGenerator.instance.ClearHighlightedTiles();
-
                     currentSelectedPlayer = player;
                     ToggleUI(true);
                 }

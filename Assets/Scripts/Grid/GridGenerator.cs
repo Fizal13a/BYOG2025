@@ -61,22 +61,20 @@ public class GridGenerator : MonoBehaviour
                 gridTiles[x, y] = tileScript;
                 tileScript.SetGridPosition(new Vector2Int(x,y));
 
-                if (GameManager.instance.playerGoalTilePos == new Vector2Int(x, y))
-                {
-                    GameManager.instance.SetPlayerGoalTile(tileScript);
-                }
-                
-                if (GameManager.instance.aiGoalTilePos == new Vector2Int(x, y))
+                if (GameManager.instance.aiTeamGoalPos == new Vector2Int(x, y))
                 {
                     GameManager.instance.SetAIGoalTile(tileScript);
+                }
+                
+                if (GameManager.instance.playerTeamGoalPos == new Vector2Int(x, y))
+                {
+                    GameManager.instance.SetPlayerGoalTile(tileScript);
                 }
 
                 // Store in array
                 grid[x, y] = tile;
             }
         }
-
-        SetTileNeighbors();
     }
 
     #endregion
@@ -95,6 +93,20 @@ public class GridGenerator : MonoBehaviour
         if (x < 0 || x >= gameSettings.gridWidth || y < 0 || y >= gameSettings.gridHeight)
             return null;
         return gridTiles[x, y];
+    }
+
+    #endregion
+
+    #region Setters
+
+    public void ResetOccupiedTiles()
+    {
+        if(gridTiles == null) return;
+
+        foreach (GridTile tile in gridTiles)
+        {
+            tile.SetOccupied(false);
+        }
     }
 
     #endregion
@@ -161,137 +173,6 @@ public class GridGenerator : MonoBehaviour
             tile.Highlight(false);
         highlightedTiles.Clear();
     }
-
-
-    #endregion
-
-    #region PathFinding
-
-     // 🔹 Converts a world position to a GridTile
-    public GridTile GetTileFromWorld(Vector3 worldPos)
-    {
-        GridTile closestTile = null;
-        float minDist = Mathf.Infinity;
-
-        foreach (var tile in allTiles)
-        {
-            float dist = Vector3.Distance(worldPos, tile.transform.position);
-            if (dist < minDist)
-            {
-                minDist = dist;
-                closestTile = tile;
-            }
-        }
-        return closestTile;
-    }
-
-    // 🔹 Finds a path using A* algorithm
-    public List<GridTile> GetPath(GridTile startTile, GridTile targetTile)
-    {
-        if (startTile == null || targetTile == null)
-            return null;
-
-        List<GridTile> openSet = new List<GridTile>();
-        HashSet<GridTile> closedSet = new HashSet<GridTile>();
-
-        openSet.Add(startTile);
-
-        while (openSet.Count > 0)
-        {
-            GridTile current = openSet[0];
-
-            for (int i = 1; i < openSet.Count; i++)
-            {
-                if (openSet[i].FCost < current.FCost ||
-                    (openSet[i].FCost == current.FCost && openSet[i].hCost < current.hCost))
-                {
-                    current = openSet[i];
-                }
-            }
-
-            openSet.Remove(current);
-            closedSet.Add(current);
-
-            if (current == targetTile)
-                return RetracePath(startTile, targetTile);
-
-            foreach (GridTile neighbor in current.neighbors)
-            {
-                if (!neighbor.IsWalkable || closedSet.Contains(neighbor))
-                    continue;
-
-                int newCostToNeighbor = current.gCost + GetDistance(current, neighbor);
-                if (newCostToNeighbor < neighbor.gCost || !openSet.Contains(neighbor))
-                {
-                    neighbor.gCost = newCostToNeighbor;
-                    neighbor.hCost = GetDistance(neighbor, targetTile);
-                    neighbor.parent = current;
-
-                    if (!openSet.Contains(neighbor))
-                        openSet.Add(neighbor);
-                }
-            }
-        }
-
-        return null; // no path found
-    }
-
-    private List<GridTile> RetracePath(GridTile start, GridTile end)
-    {
-        List<GridTile> path = new List<GridTile>();
-        GridTile current = end;
-
-        while (current != start)
-        {
-            path.Add(current);
-            current = current.parent;
-        }
-        path.Reverse();
-        return path;
-    }
-
-    private int GetDistance(GridTile a, GridTile b)
-    {
-        int dstX = Mathf.Abs(a.GridPosition.x - b.GridPosition.x);
-        int dstY = Mathf.Abs(a.GridPosition.x - b.GridPosition.y);
-
-        if (dstX > dstY)
-            return 14 * dstY + 10 * (dstX - dstY);
-        return 14 * dstX + 10 * (dstY - dstX);
-    }
-    
-    public void SetTileNeighbors()
-    {
-        foreach (GridTile tile in allTiles)
-        {
-            tile.neighbors.Clear();
-
-            for (int x = -1; x <= 1; x++)
-            {
-                for (int y = -1; y <= 1; y++)
-                {
-                    if (x == 0 && y == 0)
-                        continue;
-
-                    int checkX = tile.GridPosition.x + x;
-                    int checkY = tile.GridPosition.y + y;
-
-                    // Make sure within grid bounds
-                    if (checkX >= 0 && checkY >= 0 && checkX < gameSettings.gridWidth && checkY < gameSettings.gridWidth)
-                    {
-                        GridTile neighbor = gridTiles[checkX, checkY];
-                        if (neighbor != null && neighbor.IsWalkable)
-                        {
-                            tile.neighbors.Add(neighbor);
-                        }
-                    }
-                }
-            }
-        }
-
-        DebugLogger.Log("✅ Tile neighbors successfully assigned!", "green");
-    }
-
 
     #endregion
    

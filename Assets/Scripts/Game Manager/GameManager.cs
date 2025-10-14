@@ -21,8 +21,8 @@ public partial class GameManager : MonoBehaviour
     public Vector2Int[] playerSpawnTiles;
     public Vector2Int[] aiSpawnTiles;
     public Vector2Int ballSpawnTile;
-    public Vector2Int playerGoalTilePos;
-    public Vector2Int aiGoalTilePos;
+    public Vector2Int aiTeamGoalPos;
+    public Vector2Int playerTeamGoalPos;
     
     [Header("In Game Referances")]
     public PlayerController playerController;
@@ -230,12 +230,22 @@ public partial class GameManager : MonoBehaviour
 
     public void ResetMatch()
     {
+        GridGenerator.instance.ResetOccupiedTiles();
+        
         for (int i = 0; i < playerSpawnTiles.Length; i++)
         {
             float yPos = players[i].transform.position.y;
             players[i].transform.position = new Vector3(playerSpawnTiles[i].x, yPos, playerSpawnTiles[i].y);
+            Player pl = players[i].GetComponent<Player>();
+            pl.SetGridPosition(playerSpawnTiles[i]);
+            GridTile playerTile = GridGenerator.instance.GetTile(playerSpawnTiles[i].x, playerSpawnTiles[i].y);
+            playerTile.SetOccupied(true);
             
             aiPlayers[i].transform.position = new Vector3(aiSpawnTiles[i].x, yPos, aiSpawnTiles[i].y);
+            AIPlayer aiP = aiPlayers[i].GetComponent<AIPlayer>();
+            aiP.SetGridPosition(aiSpawnTiles[i]);
+            GridTile aiTile = GridGenerator.instance.GetTile(aiSpawnTiles[i].x, aiSpawnTiles[i].y);
+            aiTile.SetOccupied(true);
         }
 
         if (scoredTeam == "Player")

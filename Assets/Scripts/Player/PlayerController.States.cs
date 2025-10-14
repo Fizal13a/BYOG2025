@@ -7,6 +7,7 @@ public partial class PlayerController : MonoBehaviour
     private void HandleStates(PlayerStates state)
     {
         currentAction = state;
+        GridGenerator.instance.ClearHighlightedTiles();
 
         switch (state)
         {
@@ -43,7 +44,5 @@ public partial class PlayerController : MonoBehaviour
                 DebugLogger.Log("Player On Dash State", "yellow");
                 break;
         }
-        
-        ToggleUI(false);
     }
 }

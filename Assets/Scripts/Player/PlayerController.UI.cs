@@ -57,12 +57,16 @@ public partial class PlayerController : MonoBehaviour
         Vector2Int playerGridPos = currentSelectedPlayer.GetGridPosition();
 
         // Disable tackle button if player with ball exists nearby
-        if (currentPlayerWithBall != null || IsBallAdjacent(playerGridPos))
+        if (currentPlayerWithBall != null || !IsBallAdjacent(playerGridPos))
             tackleButton.interactable = false;
+        
+        // Disable pass button if player with ball not exists
+        if (currentPlayerWithBall == null)
+            passButton.interactable = false;
 
         // Disable shoot button if player doesn't have ball or near goal
-        //if (currentPlayerWithBall == null || IsNearGoal(playerGridPos))
-            //shootButton.interactable = false;
+        if (currentPlayerWithBall == null || !IsNearGoal(playerGridPos))
+            shootButton.interactable = false;
     }
 
     private bool IsBallAdjacent(Vector2Int playerGridPos)
