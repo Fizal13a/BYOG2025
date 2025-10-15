@@ -42,6 +42,8 @@ public partial class PlayerController : MonoBehaviour
 
     private void ToggleUI(bool state)
     {
+        if(currentSelectedPlayer == null) return;
+        
         // Enable/disable UI
         playerUIPanel.SetActive(state);
 
@@ -62,7 +64,13 @@ public partial class PlayerController : MonoBehaviour
         
         // Disable pass button if player with ball not exists
         if (currentPlayerWithBall == null)
+        {
             passButton.interactable = false;
+        }
+        else if(currentSelectedPlayer != currentPlayerWithBall)
+        {
+            passButton.interactable = false;
+        }
 
         // Disable shoot button if player doesn't have ball or near goal
         if (currentPlayerWithBall == null || !IsNearGoal(playerGridPos))
