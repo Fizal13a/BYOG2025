@@ -44,6 +44,7 @@ public class GridGenerator : MonoBehaviour
         int height = gameSettings.gridHeight;
         float spacing = gameSettings.spacing;
         GameObject tilePrefab = gameSettings.tilePrefab;
+        GameObject goalPost = gameSettings.goalPost;
 
         grid = new GameObject[width, height];
         gridTiles = new GridTile[width, height];
@@ -63,11 +64,18 @@ public class GridGenerator : MonoBehaviour
 
                 if (GameManager.instance.aiTeamGoalPos == new Vector2Int(x, y))
                 {
+                    position.y = 0.4f;
+                    GameObject goal = Instantiate(goalPost, position, Quaternion.identity, transform);
+                    goal.transform.SetParent(tile.transform);
                     GameManager.instance.SetAIGoalTile(tileScript);
                 }
                 
                 if (GameManager.instance.playerTeamGoalPos == new Vector2Int(x, y))
                 {
+                    position.y = 0.4f;
+                    GameObject goal = Instantiate(goalPost, position, Quaternion.identity, transform);
+                    goal.transform.rotation = Quaternion.Euler(0,180,0);
+                    goal.transform.SetParent(tile.transform);
                     GameManager.instance.SetPlayerGoalTile(tileScript);
                 }
 

@@ -21,4 +21,5 @@ public class GameSettings : ScriptableObject
     public int gridWidth = 10;
     public float spacing = 1f;
     public GameObject tilePrefab;
+    public GameObject goalPost;
 }
