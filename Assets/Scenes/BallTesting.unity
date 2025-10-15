@@ -2727,13 +2727,13 @@ MonoBehaviour:
   - {x: 5, y: 7}
   - {x: 3, y: 6}
   ballSpawnTile: {x: 1, y: 2}
-  playerGoalTilePos: {x: 3, y: 0}
-  aiGoalTilePos: {x: 3, y: 8}
+  aiTeamGoalPos: {x: 3, y: 0}
+  playerTeamGoalPos: {x: 3, y: 8}
   playerController: {fileID: 1712556749}
   aiPlayerController: {fileID: 783325683}
   turnDisplayText: {fileID: 180184932}
   turnTimerText: {fileID: 665415128}
-  currentState: 0
+  currentState: 1
 --- !u!1 &1592327528
 GameObject:
   m_ObjectHideFlags: 0

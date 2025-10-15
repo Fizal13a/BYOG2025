@@ -79,7 +79,7 @@ public partial class GameManager : MonoBehaviour
 
             if (tile)
             {
-                Vector3 spawnPos = tile.transform.position + Vector3.up * 0.5f;
+                Vector3 spawnPos = tile.transform.position + Vector3.up * 0.1f;
                 players[i] = Instantiate(playerPrefab, spawnPos, Quaternion.identity);
                 players[i].name = $"Player_{i}";
                 players[i].transform.SetParent(playersParent);
@@ -99,8 +99,8 @@ public partial class GameManager : MonoBehaviour
 
             if (tile)
             {
-                Vector3 spawnPos = tile.transform.position + Vector3.up * 0.5f;
-                aiPlayers[i] = Instantiate(aiPrefab, spawnPos, Quaternion.identity);
+                Vector3 spawnPos = tile.transform.position + Vector3.up * 0.1f;
+                aiPlayers[i] = Instantiate(aiPrefab, spawnPos, Quaternion.Euler(0,180f,0));
                 aiPlayers[i].name = $"AI_{i}";
                 aiPlayers[i].transform.SetParent(aisParent);
                 AIPlayer ai  = aiPlayers[i].GetComponent<AIPlayer>();
