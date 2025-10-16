@@ -1,13 +1,14 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public partial class AIPlayerController : MonoBehaviour
 {
-    public enum AIStates
-    {
-        Move, Pass, Tackle, Shoot, Dash
-    }
+    public static AIPlayerController instance;
+    
+    public List<ActionData> availableActions = new List<ActionData>();
+    private ActionData currentAction;
 
     [Header("Game Data")] 
     public LayerMask playerLayer;
@@ -21,8 +22,12 @@ public partial class AIPlayerController : MonoBehaviour
     [SerializeField] private GridTile goalTile;
     private bool isAITurn = false;
 
-    private void OnEnable()
+    private void Awake()
     {
+        if (instance == null)
+        {
+            instance = this;
+        }
     }
 
     public void SetUpAIs()
@@ -37,6 +42,15 @@ public partial class AIPlayerController : MonoBehaviour
         {
             ais[index] = player;
             player.SetUpPlayer(this, gridPos);
+        }
+    }
+
+    public void RemoveBall()
+    {
+        if (hasBall && currentAIWithBall != null)
+        {
+            hasBall = false;
+            currentAIWithBall = null;
         }
     }
 
@@ -72,12 +86,22 @@ public partial class AIPlayerController : MonoBehaviour
         isAITurn = turn;
         if (isAITurn)
         {
-            AIStates selectedState = SelectAIState();
-            ExecuteState(selectedState);
+            ActionData.Actions selectedState = SelectAIState();
+            foreach (var action in availableActions)
+            {
+                if (action.action == selectedState)
+                {
+                    currentAction = action;
+                    break;
+                }
+            }
+            
+            if(GameManager.instance.SpendActionPoints(currentAction.actionCost))
+                ExecuteState(selectedState);
         }
     }
     
-    private AIStates SelectAIState()
+    private ActionData.Actions SelectAIState()
     {
         // Check if any AI has the ball
         UpdateBallStatus();
@@ -90,17 +114,17 @@ public partial class AIPlayerController : MonoBehaviour
             
             if (distanceToGoal <= 2)
             {
-                return AIStates.Shoot;
+                return ActionData.Actions.Shoot;
             }
             
             // Check if any enemy players within 2 tiles - ALWAYS pass if enemies nearby
             if (AreEnemiesNearby(currentAIWithBall, 1))
             {
-                return AIStates.Pass;
+                return ActionData.Actions.Pass;
             }
             else
             {
-                return AIStates.Move; // Move towards goal
+                return ActionData.Actions.Move; // Move towards goal
             }
         }
         else
@@ -120,33 +144,33 @@ public partial class AIPlayerController : MonoBehaviour
                 if (xDist <= 1 && yDist <= 1)
                 {
                     currentSelectedAI = closestAIToBall;
-                    return AIStates.Tackle;
+                    return ActionData.Actions.Tackle;
                 }
             }
             
             // Select AI nearest to ball or player with ball and move
             currentSelectedAI = GetBestAIToSelect(ballTile);
-            return AIStates.Move;
+            return ActionData.Actions.Move;
         }
     }
     
-    private void ExecuteState(AIStates state)
+    private void ExecuteState(ActionData.Actions state)
     {
         switch (state)
         {
-            case AIStates.Move:
+            case ActionData.Actions.Move:
                 ExecuteMove();
                 break;
-            case AIStates.Pass:
+            case ActionData.Actions.Pass:
                 ExecutePass();
                 break;
-            case AIStates.Tackle:
+            case ActionData.Actions.Tackle:
                 ExecuteTackle();
                 break;
-            case AIStates.Shoot:
+            case ActionData.Actions.Shoot:
                 ExecuteShoot();
                 break;
-            case AIStates.Dash:
+            case ActionData.Actions.Dash:
                 // Implement later
                 break;
         }
@@ -155,7 +179,7 @@ public partial class AIPlayerController : MonoBehaviour
     IEnumerator EndTurn()
     {
         yield return new WaitForSeconds(1f);
-        GameManager.instance.EndTurnEarly();
+        
     }
     
     private void ExecuteMove()
@@ -475,7 +499,17 @@ public partial class AIPlayerController : MonoBehaviour
     IEnumerator DelayAfterTackle()
     {
         yield return new WaitForSeconds(0.5f);
-        ExecuteState(AIStates.Pass);
+        foreach (var action in availableActions)
+        {
+            if (action.action == ActionData.Actions.Move)
+            {
+                currentAction = action;
+                break;
+            }
+        }
+        
+        if(GameManager.instance.SpendActionPoints(currentAction.actionCost))
+            ExecuteState(currentAction.action);
     }
 
     IEnumerator ResetRound()

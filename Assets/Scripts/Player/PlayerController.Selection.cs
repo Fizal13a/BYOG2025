@@ -20,13 +20,13 @@ public partial class PlayerController : MonoBehaviour
                 {
                     DebugLogger.Log("Target Tile Selected", "yellow");
 
-                    switch(currentAction)
+                    switch(currentAction.action)
                     {
-                        case PlayerStates.Move:
+                        case ActionData.Actions.Move:
                             MoveToTile(clickedTile);
                             break;
 
-                        case PlayerStates.Pass:
+                        case ActionData.Actions.Pass:
                             PassToPlayer(clickedTile);
                             break;
                     }

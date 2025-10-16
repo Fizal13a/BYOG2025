@@ -29,11 +29,11 @@ public partial class PlayerController : MonoBehaviour
         shootButton.onClick.RemoveAllListeners();
         dashButton.onClick.RemoveAllListeners();
 
-        moveButton.onClick.AddListener(() => HandleStates(PlayerStates.Move));
-        passButton.onClick.AddListener(() => HandleStates(PlayerStates.Pass));
-        tackleButton.onClick.AddListener(() => HandleStates(PlayerStates.Tackle));
-        shootButton.onClick.AddListener(() => HandleStates(PlayerStates.Shoot));
-        dashButton.onClick.AddListener(() => HandleStates(PlayerStates.Dash));
+        moveButton.onClick.AddListener(() => HandleStates(availableActions[0].action));
+        passButton.onClick.AddListener(() => HandleStates(availableActions[1].action));
+        tackleButton.onClick.AddListener(() => HandleStates(availableActions[2].action));
+        shootButton.onClick.AddListener(() => HandleStates(availableActions[3].action));
+        dashButton.onClick.AddListener(() => HandleStates(availableActions[4].action));
     }
 
     #endregion

@@ -1,90 +1,108 @@
-using System;
 using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 public partial class GameManager : MonoBehaviour
 {
     [Header("Runtime Info")]
     public GameSettings.GameState currentState;
-    private Coroutine turnRoutine;
 
-    private Coroutine stateDelayRoutine;
-    
-    // --- Player Turn --- 
-    private void StartPlayerTurn()
+    [Header("Action Point Settings")]
+    [SerializeField] private int baseActionPoints = 3;
+    [SerializeField] private int maxCarryOverPoints = 10;
+
+    private TurnHandler playerTeam;
+    private TurnHandler opponentTeam; // Could be AI or Player 2
+
+    private void SetUpTurnStates()
     {
-        currentState = GameSettings.GameState.PlayerTurn;
-        SetTurnDisplayText(currentState.ToString());
-        Debug.Log("Player Turn Started");
-
-        playerController.SetUpTurn(true);
-        aiPlayerController.SetUpTurn(false);
-
-        // Automatically switch to AI after delay
-        if (turnRoutine != null) StopCoroutine(turnRoutine);
-        turnRoutine = StartCoroutine(WaitAndStartNextTurn(GameSettings.GameState.AITurn));
+        // Assign teams (for now, Player vs AI)
+        playerTeam = new TurnHandler("Player");
+        opponentTeam = new TurnHandler("Opponent");
     }
 
-    // --- AI Turn --- 
-    private void StartAITurn()
+    // --- Turn Start ---
+    private void StartTurn(TurnHandler team)
     {
-        Debug.Log("AI Turn Started");
-        currentState = GameSettings.GameState.AITurn;
-        SetTurnDisplayText(currentState.ToString());
+        currentState = team == playerTeam ? GameSettings.GameState.PlayerTurn : GameSettings.GameState.AITurn;
+        SetTurnDisplayText($"{team.TeamName} Turn");
 
-        aiPlayerController.SetUpTurn(true);
-        playerController.SetUpTurn(false);
+        team.BeginTurn(baseActionPoints, maxCarryOverPoints);
+        UpdateActionPointUI(team.CurrentAP);
 
-        if (turnRoutine != null) StopCoroutine(turnRoutine);
-        turnRoutine = StartCoroutine(WaitAndStartNextTurn(GameSettings.GameState.PlayerTurn));
-        
-        GridGenerator.instance.ClearHighlightedTiles();
+        Debug.Log($"{team.TeamName} Turn Started with {team.CurrentAP} AP");
+
+        // Enable/Disable input accordingly
+        playerController.SetUpTurn(team == playerTeam);
+        aiPlayerController.SetUpTurn(team == opponentTeam && IsAITurn());
+
+        // If AI turn, start coroutine
+        if (IsAITurn())
+            StartCoroutine(HandleAITurn());
     }
 
-    // --- Wait State --- 
-    IEnumerator WaitAndStartNextTurn(GameSettings.GameState nextState)
+    // --- Turn End ---
+    public void EndTurn()
     {
-        DebugLogger.Log("WaitAndStartNextTurn", "orange");
-        float currentTime = gameSettings.turnDuration;
+        TurnHandler activeTeam = IsPlayerTurn() ? playerTeam : opponentTeam;
+        TurnHandler nextTeam = IsPlayerTurn() ? opponentTeam : playerTeam;
 
-        while (currentTime > 0)
-        {
-            currentTime -= Time.deltaTime; // decrease per second, not per frame
-            SetTurnTimerText(currentTime);
-            yield return null;
-        }
+        Debug.Log($"{activeTeam.TeamName} Turn Ended with {activeTeam.CurrentAP} leftover AP");
 
-        // Ensure timer text shows 0 at end
-        SetTurnTimerText(0);
-
-        // Switch to next state
-        if (nextState == GameSettings.GameState.PlayerTurn)
-            StartPlayerTurn();
-        else if (nextState == GameSettings.GameState.AITurn)
-            StartAITurn();
+        StartTurn(nextTeam);
     }
 
-    
-    // --- Skip Turn --- 
-    public void EndTurnEarly()
-    {
-        if (turnRoutine != null)
-        {
-            StopCoroutine(turnRoutine);
-            if (currentState == GameSettings.GameState.PlayerTurn)
-                StartAITurn();
-            else if (currentState == GameSettings.GameState.AITurn)
-                StartPlayerTurn();
-        }
-    }
-    
     public void StopAllTurns()
     {
-        if (turnRoutine != null)
+        currentState = GameSettings.GameState.Waiting;
+    }
+
+    // --- Spend Action Points ---
+    public bool SpendActionPoints(int cost)
+    {
+        TurnHandler activeTeam = IsPlayerTurn() ? playerTeam : opponentTeam;
+
+        if (!activeTeam.CanAfford(cost))
         {
-            StopCoroutine(turnRoutine);
+            Debug.Log("Not enough Action Points!");
+            return false;
         }
+
+        activeTeam.UseActionPoints(cost);
+        UpdateActionPointUI(activeTeam.CurrentAP);
+
+        if (activeTeam.CurrentAP <= 0)
+            EndTurn();
+
+        return true;
+    }
+
+    // --- AI Logic (temporary stub) ---
+    private IEnumerator HandleAITurn()
+    {
+        TurnHandler aiTeam = opponentTeam;
+
+        yield return new WaitForSeconds(1f);
+
+        while (aiTeam.CurrentAP > 0)
+        {
+            int actionCost = Random.Range(1, 3);
+            aiTeam.UseActionPoints(actionCost);
+            Debug.Log($"AI performed action costing {actionCost}. Remaining AP: {aiTeam.CurrentAP}");
+
+            UpdateActionPointUI(aiTeam.CurrentAP);
+
+            yield return new WaitForSeconds(1f);
+        }
+
+        EndTurn();
+    }
+
+    private bool IsPlayerTurn() => currentState == GameSettings.GameState.PlayerTurn;
+    private bool IsAITurn() => currentState == GameSettings.GameState.AITurn;
+
+    private void UpdateActionPointUI(int points)
+    {
+        // Hook this to your UI
+        SetActionPointsText(points);
     }
 }

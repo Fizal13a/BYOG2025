@@ -48,7 +48,6 @@ public partial class PlayerController : MonoBehaviour
         }
         
         currentSelectedPlayer = null;
-        GameManager.instance.EndTurnEarly();
     }
 
     #endregion
@@ -114,7 +113,6 @@ public partial class PlayerController : MonoBehaviour
 
         ball.transform.position = new Vector3(endPos.x, endPos.y + 0.3f, endPos.z);
         SetPlayerWithBall(currentPlayerWithBall);
-        GameManager.instance.EndTurnEarly();
     }
 
     #endregion
@@ -128,7 +126,8 @@ public partial class PlayerController : MonoBehaviour
         Vector2Int playerGridPos = currentSelectedPlayer.GetGridPosition();
         GameManager.instance.SetBallPosition(playerGridPos);
         SetPlayerWithBall(currentSelectedPlayer);
-        HandleStates(PlayerStates.Move);
+        HandleStates(ActionData.Actions.Move);
+        AIPlayerController.instance.RemoveBall();
         
         ToggleUI(false);
     }
@@ -197,6 +196,5 @@ public partial class PlayerController : MonoBehaviour
     private void Dash()
     {
         currentSelectedPlayer = null;
-        GameManager.instance.EndTurnEarly();
     }
 }

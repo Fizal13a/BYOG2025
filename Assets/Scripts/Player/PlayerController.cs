@@ -6,10 +6,9 @@ using UnityEngine.EventSystems;
 public partial class PlayerController : MonoBehaviour
 {
     public static PlayerController instance;
-    public enum PlayerStates
-    {
-        Move, Pass, Tackle, Shoot, Dash
-    }
+    
+    public List<ActionData> availableActions = new List<ActionData>();
+    private ActionData currentAction;
     
     [Header("Game Referances")]
     public Camera mainCamera;
@@ -23,7 +22,6 @@ public partial class PlayerController : MonoBehaviour
     private Player currentSelectedPlayer;
     public  Player currentPlayerWithBall;
     public Player currentPassTargetPlayer;
-    private PlayerStates currentState;
     
     private bool isPlayerTurn = false;
 

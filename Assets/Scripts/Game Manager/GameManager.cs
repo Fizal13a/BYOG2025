@@ -56,6 +56,7 @@ public partial class GameManager : MonoBehaviour
     void Start()
     {
         // --- All initializing goes here --- 
+        SetUpTurnStates();
         InitializeMatch();
     }
 
@@ -133,14 +134,14 @@ public partial class GameManager : MonoBehaviour
             // --- Start State --- 
             AIPlayer ai = aiPlayers[0].GetComponent<AIPlayer>();
             aiPlayerController.SetPlayerWithBall(ai);
-            StartAITurn();
+            StartTurn(opponentTeam);
         }
         else
         {
             // --- Start State --- 
             Player player = players[0].GetComponent<Player>();
             playerController.SetPlayerWithBall(player);
-            StartPlayerTurn();
+            StartTurn(playerTeam);
         }
     }
 
@@ -253,14 +254,14 @@ public partial class GameManager : MonoBehaviour
             SetBallPosition(playerSpawnTiles[0]);
             Player player = players[0].GetComponent<Player>();
             playerController.SetPlayerWithBall(player);
-            StartCoroutine(DelayForTurn(StartPlayerTurn));
+            StartCoroutine(DelayForTurn(() => StartTurn(playerTeam)));
         }
         else
         {
             SetBallPosition(aiSpawnTiles[0]);
             AIPlayer ai = aiPlayers[0].GetComponent<AIPlayer>();
             aiPlayerController.SetPlayerWithBall(ai);
-            StartCoroutine(DelayForTurn(StartAITurn));
+            StartCoroutine(DelayForTurn(() => StartTurn(opponentTeam)));
         }
     }
 
