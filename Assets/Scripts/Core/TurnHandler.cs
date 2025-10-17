@@ -26,4 +26,9 @@ public class TurnHandler
     {
         return CurrentAP >= cost;
     }
+
+    public void SetCurrentActionPoints(int amount)
+    {
+        CurrentAP = amount;
+    }
 }

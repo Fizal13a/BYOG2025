@@ -232,6 +232,7 @@ public partial class GameManager : MonoBehaviour
     public void ResetMatch()
     {
         GridGenerator.instance.ResetOccupiedTiles();
+        ResetActionPoints();
         
         for (int i = 0; i < playerSpawnTiles.Length; i++)
         {

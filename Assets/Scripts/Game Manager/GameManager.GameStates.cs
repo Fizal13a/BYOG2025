@@ -97,6 +97,12 @@ public partial class GameManager : MonoBehaviour
         EndTurn();
     }
 
+    public void ResetActionPoints()
+    {
+        playerTeam.SetCurrentActionPoints(0);
+        opponentTeam.SetCurrentActionPoints(0);
+    }
+
     private bool IsPlayerTurn() => currentState == GameSettings.GameState.PlayerTurn;
     private bool IsAITurn() => currentState == GameSettings.GameState.AITurn;
 
