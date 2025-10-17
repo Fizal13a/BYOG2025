@@ -84,34 +84,49 @@ public partial class PlayerController : MonoBehaviour
             yield break;
 
         GameObject ball = GameManager.instance.GetBallObject();
-        
+    
         Vector3 startPos = ball.transform.position;
         Vector3 endPos = targetTile.position;
+        Vector3 midPoint = (startPos + endPos) / 2f;
 
+        float distance = Vector3.Distance(startPos, endPos);
+        float duration = Mathf.Clamp(distance * 0.4f, 0.3f, 1.2f); // Duration scales with distance
         float elapsed = 0f;
 
-        Vector3 forwardDir = (endPos - startPos).normalized;
-        Vector3 sideDir = Vector3.Cross(Vector3.up, forwardDir); 
+        // Calculate arc with some randomness for arcade feel
+        float arcHeight = distance * 0.3f + Random.Range(-0.1f, 0.15f);
 
-        while (elapsed < 1)
+        // Get rotation direction
+        Vector3 direction = (endPos - startPos).normalized;
+        Quaternion rotationAxis = Quaternion.FromToRotation(Vector3.forward, direction);
+
+        while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
-            float t = Mathf.Clamp01(elapsed / 1);
+            float t = Mathf.Clamp01(elapsed / duration);
 
-            float smoothT = Mathf.Pow(t, 5f);
+            // Ease-out-in curve for more natural feel (faster start, slower end)
+            float easeT = t < 0.5f 
+                ? 2f * t * t 
+                : -1f + (4f - 2f * t) * t;
 
-            Vector3 pos = Vector3.Lerp(startPos, endPos, smoothT);
+            // Parabolic arc (more natural than sine)
+            float arcAmount = Mathf.Sin(t * Mathf.PI) * arcHeight;
 
-            float heightOffset = Mathf.Sin(smoothT * Mathf.PI) * 0.3f;
-
-            pos.y += heightOffset + 0.3f;
+            // Interpolate position with arc
+            Vector3 pos = Vector3.Lerp(startPos, endPos, easeT);
+            pos.y += arcAmount;
 
             ball.transform.position = pos;
+
+            // Rotate ball for tumble effect
+            ball.transform.Rotate(direction * 800f * Time.deltaTime, Space.World);
 
             yield return null;
         }
 
-        ball.transform.position = new Vector3(endPos.x, endPos.y + 0.3f, endPos.z);
+        // Snap to final position
+        ball.transform.position = new Vector3(endPos.x, endPos.y + 0.05f, endPos.z);
         SetPlayerWithBall(currentPlayerWithBall);
     }
 
@@ -145,47 +160,56 @@ public partial class PlayerController : MonoBehaviour
 
         Transform targetPos = targetTile.transform;
 
-        StartCoroutine(BallShootToGaoal(targetTile.transform));
+        StartCoroutine(BallShootToGoal(targetTile.transform));
 
         currentSelectedPlayer = null;
         
         ToggleUI(false);
     }
     
-    IEnumerator BallShootToGaoal(Transform targetTile)
+    IEnumerator BallShootToGoal(Transform targetTile)
     {
         if (targetTile == null)
             yield break;
 
         GameObject ball = GameManager.instance.GetBallObject();
-        
+    
         Vector3 startPos = ball.transform.position;
         Vector3 endPos = targetTile.position;
 
+        float distance = Vector3.Distance(startPos, endPos);
+        float duration = Mathf.Clamp(distance * 0.25f, 0.2f, 0.8f); // Faster than passes
         float elapsed = 0f;
 
-        Vector3 forwardDir = (endPos - startPos).normalized;
-        Vector3 sideDir = Vector3.Cross(Vector3.up, forwardDir); 
+        // Higher arc for goal shots (more dramatic)
+        float arcHeight = distance * 0.2f + Random.Range(0.02f, 0.1f);
 
-        while (elapsed < 1)
+        Vector3 direction = (endPos - startPos).normalized;
+
+        while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
-            float t = Mathf.Clamp01(elapsed / 1);
+            float t = Mathf.Clamp01(elapsed / duration);
 
-            float smoothT = Mathf.Pow(t, 5f);
+            // Ease-out curve (fast start, quick deceleration) for powerful feel
+            float easeT = 1f - Mathf.Pow(1f - t, 2.5f);
 
-            Vector3 pos = Vector3.Lerp(startPos, endPos, smoothT);
+            // Parabolic arc
+            float arcAmount = Mathf.Sin(t * Mathf.PI) * arcHeight;
 
-            float heightOffset = Mathf.Sin(smoothT * Mathf.PI) * 0.3f;
-
-            pos.y += heightOffset + 0.3f;
+            Vector3 pos = Vector3.Lerp(startPos, endPos, easeT);
+            pos.y += arcAmount;
 
             ball.transform.position = pos;
+
+            // Faster spin for more aggressive feel
+            ball.transform.Rotate(direction * 1200f * Time.deltaTime, Space.World);
 
             yield return null;
         }
 
-        ball.transform.position = new Vector3(endPos.x, endPos.y + 0.3f, endPos.z);
+        // Snap to final position
+        ball.transform.position = endPos;
         UIManager.instance.AddPlayerScore(1);
         GameManager.instance.ResetRound();
     }
