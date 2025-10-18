@@ -235,6 +235,14 @@ public partial class AIPlayerController : MonoBehaviour
     {
         if (currentAIWithBall != null)
         {
+            #region Play Animation
+
+            Animator animator = currentAIWithBall.GetComponentInChildren<Animator>();
+
+            AnimationManager.Instance.PassAnim(animator);
+
+            #endregion
+
             AIPlayer bestReceiver = FindBestPassReceiver();
             if (bestReceiver != null)
             {
@@ -291,6 +299,14 @@ public partial class AIPlayerController : MonoBehaviour
     {
         if (currentSelectedAI != null)
         {
+            #region Play Animation
+
+            Animator animator = currentSelectedAI.GetComponentInChildren<Animator>();
+
+            AnimationManager.Instance.TackleAnim(animator);
+
+            #endregion
+
             Debug.Log($"{currentSelectedAI.name} attempting tackle");
             SetPlayerWithBall(currentSelectedAI);
             StartCoroutine(DelayAfterTackle());
@@ -301,6 +317,14 @@ public partial class AIPlayerController : MonoBehaviour
     {
         if (currentAIWithBall != null)
         {
+            #region Play Animation
+
+            Animator animator = currentAIWithBall.GetComponentInChildren<Animator>();
+
+            AnimationManager.Instance.ShootAnim(animator);
+
+            #endregion
+
             Debug.Log($"{currentAIWithBall.name} shooting at goal");
             GameObject ball = GameManager.instance.GetBallObject();
             Transform goalTile = GameManager.instance.GetAIGoalTile().transform;

@@ -12,16 +12,24 @@ public partial class AIPlayerController : MonoBehaviour
             currentTile.SetOccupied(false);
             currentTile.occupyingEntity = null;
         }
-        
+
+        #region Play Animation
+
+        Animator animator = currentplayer.GetComponentInChildren<Animator>();
+
+        AnimationManager.Instance.MoveAnim(animator,true);
+
+        #endregion
+
         // Move to new tile
         currentplayer.SetGridPosition(tile.GridPosition);
         tile.SetOccupied(true);
         tile.occupyingEntity = currentplayer.gameObject;
-        StartCoroutine(MoveToTileRoutine(currentplayer, tile));
+        StartCoroutine(MoveToTileRoutine(animator, currentplayer, tile));
         DebugLogger.Log(currentplayer, "yellow");
     }
     
-    private IEnumerator MoveToTileRoutine(AIPlayer currentplayer, GridTile targetTile)
+    private IEnumerator MoveToTileRoutine(Animator animator, AIPlayer currentplayer, GridTile targetTile)
     {
         Vector3 start = currentplayer.transform.position;
         Vector3 end = targetTile.WorldPosition;
@@ -41,6 +49,14 @@ public partial class AIPlayerController : MonoBehaviour
         {
             //SetPlayerWithBall(currentplayer);
         }
+
+        #region Play Animation
+
+        AnimationManager.Instance.MoveAnim(animator, false);
+
+        #endregion
+
+
         currentSelectedAI = null;
         //GameManager.instance.EndTurnEarly();
 
