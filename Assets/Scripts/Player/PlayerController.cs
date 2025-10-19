@@ -71,6 +71,11 @@ public partial class PlayerController : MonoBehaviour
         currentPassTargetPlayer = null;
     }
 
+    public void RemovePlayerWithBall()
+    {
+        currentPlayerWithBall = null;
+    }
+
     #endregion
     
     private void Update()

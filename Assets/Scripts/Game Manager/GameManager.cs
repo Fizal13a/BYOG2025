@@ -134,6 +134,7 @@ public partial class GameManager : MonoBehaviour
             // --- Start State --- 
             AIPlayer ai = aiPlayers[0].GetComponent<AIPlayer>();
             aiPlayerController.SetPlayerWithBall(ai);
+            SetBallPosition(ai.GetGridPosition());
             StartTurn(opponentTeam);
         }
         else
@@ -141,6 +142,7 @@ public partial class GameManager : MonoBehaviour
             // --- Start State --- 
             Player player = players[0].GetComponent<Player>();
             playerController.SetPlayerWithBall(player);
+            SetBallPosition(player.GetGridPosition());
             StartTurn(playerTeam);
         }
     }

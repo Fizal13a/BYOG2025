@@ -11,11 +11,13 @@ public partial class GameManager : MonoBehaviour
     [SerializeField] private int maxCarryOverPoints = 10;
 
     private TurnHandler playerTeam;
-    private TurnHandler opponentTeam; // Could be AI or Player 2
+    private TurnHandler opponentTeam;
+    
+    private Coroutine currentAITurnCoroutine;
+    private bool turnTransitioning = false; // Prevent double turn ends
 
     private void SetUpTurnStates()
     {
-        // Assign teams (for now, Player vs AI)
         playerTeam = new TurnHandler("Player");
         opponentTeam = new TurnHandler("Opponent");
     }
@@ -23,6 +25,7 @@ public partial class GameManager : MonoBehaviour
     // --- Turn Start ---
     private void StartTurn(TurnHandler team)
     {
+        turnTransitioning = false; // Reset flag
         currentState = team == playerTeam ? GameSettings.GameState.PlayerTurn : GameSettings.GameState.AITurn;
         SetTurnDisplayText($"{team.TeamName} Turn");
 
@@ -31,22 +34,49 @@ public partial class GameManager : MonoBehaviour
 
         Debug.Log($"{team.TeamName} Turn Started with {team.CurrentAP} AP");
 
-        // Enable/Disable input accordingly
-        playerController.SetUpTurn(team == playerTeam);
-        aiPlayerController.SetUpTurn(team == opponentTeam && IsAITurn());
-
-        // If AI turn, start coroutine
-        if (IsAITurn())
-            StartCoroutine(HandleAITurn());
+        if (team == playerTeam)
+        {
+            // Player Turn
+            if (currentAITurnCoroutine != null)
+            {
+                StopCoroutine(currentAITurnCoroutine);
+                currentAITurnCoroutine = null;
+            }
+            
+            playerController.SetUpTurn(true);
+            aiPlayerController.SetUpTurn(false);
+        }
+        else
+        {
+            // AI Turn
+            playerController.SetUpTurn(false);
+            aiPlayerController.SetUpTurn(true);
+        }
     }
 
     // --- Turn End ---
     public void EndTurn()
     {
+        // Prevent multiple simultaneous turn ends
+        if (turnTransitioning)
+        {
+            Debug.LogWarning("Turn already transitioning, ignoring extra EndTurn call");
+            return;
+        }
+
+        turnTransitioning = true;
+
         TurnHandler activeTeam = IsPlayerTurn() ? playerTeam : opponentTeam;
         TurnHandler nextTeam = IsPlayerTurn() ? opponentTeam : playerTeam;
 
         Debug.Log($"{activeTeam.TeamName} Turn Ended with {activeTeam.CurrentAP} leftover AP");
+
+        // Stop AI coroutine if switching from AI turn
+        if (IsAITurn() && currentAITurnCoroutine != null)
+        {
+            StopCoroutine(currentAITurnCoroutine);
+            currentAITurnCoroutine = null;
+        }
 
         StartTurn(nextTeam);
     }
@@ -54,46 +84,55 @@ public partial class GameManager : MonoBehaviour
     public void StopAllTurns()
     {
         currentState = GameSettings.GameState.Waiting;
+        
+        if (currentAITurnCoroutine != null)
+        {
+            StopCoroutine(currentAITurnCoroutine);
+            currentAITurnCoroutine = null;
+        }
     }
 
     // --- Spend Action Points ---
-    public bool SpendActionPoints(int cost)
+    public void CheckEndTurn()
+    {
+        TurnHandler activeTeam = IsPlayerTurn() ? playerTeam : opponentTeam;
+        
+        if (activeTeam.CurrentAP <= 0)
+        {
+            Debug.Log($"{activeTeam.TeamName} out of action points!");
+            EndTurn();
+        }
+    }
+    
+    // --- Check for Action Points ---
+    public bool CheckActionPoints(int cost)
     {
         TurnHandler activeTeam = IsPlayerTurn() ? playerTeam : opponentTeam;
 
         if (!activeTeam.CanAfford(cost))
         {
-            Debug.Log("Not enough Action Points!");
+            Debug.Log($"Not enough Action Points! Need {cost}, Have {activeTeam.CurrentAP}");
             return false;
         }
-
+        
         activeTeam.UseActionPoints(cost);
         UpdateActionPointUI(activeTeam.CurrentAP);
+        
+        Debug.Log($"Action executed. Remaining AP: {activeTeam.CurrentAP}");
 
+        // Check immediately if this was the last action point
         if (activeTeam.CurrentAP <= 0)
-            EndTurn();
-
+        {
+            StartCoroutine(DelayedEndTurn());
+        }
+        
         return true;
     }
 
-    // --- AI Logic (temporary stub) ---
-    private IEnumerator HandleAITurn()
+    // Small delay to let current action finish before ending turn
+    IEnumerator DelayedEndTurn()
     {
-        TurnHandler aiTeam = opponentTeam;
-
-        yield return new WaitForSeconds(1f);
-
-        while (aiTeam.CurrentAP > 0)
-        {
-            int actionCost = Random.Range(1, 3);
-            aiTeam.UseActionPoints(actionCost);
-            Debug.Log($"AI performed action costing {actionCost}. Remaining AP: {aiTeam.CurrentAP}");
-
-            UpdateActionPointUI(aiTeam.CurrentAP);
-
-            yield return new WaitForSeconds(1f);
-        }
-
+        yield return new WaitForSeconds(0.1f);
         EndTurn();
     }
 
@@ -108,7 +147,6 @@ public partial class GameManager : MonoBehaviour
 
     private void UpdateActionPointUI(int points)
     {
-        // Hook this to your UI
         SetActionPointsText(points);
     }
 }

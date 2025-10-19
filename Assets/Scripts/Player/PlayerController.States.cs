@@ -2,13 +2,12 @@ using UnityEngine;
 
 public partial class PlayerController : MonoBehaviour
 {
-
     private void HandleStates(ActionData.Actions state)
     {
         currentAction = GetAction(state);
         GridGenerator.instance.ClearHighlightedTiles();
 
-        if(!GameManager.instance.SpendActionPoints(currentAction.actionCost)) return;
+        if(!GameManager.instance.CheckActionPoints(currentAction.actionCost)) return;
 
         switch (state)
         {
@@ -45,6 +44,8 @@ public partial class PlayerController : MonoBehaviour
                 DebugLogger.Log("Player On Dash State", "yellow");
                 break;
         }
+        
+        ToggleUI(false);
     }
 
     private ActionData GetAction(ActionData.Actions action)

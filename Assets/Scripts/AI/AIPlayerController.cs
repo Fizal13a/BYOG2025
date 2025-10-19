@@ -3,6 +3,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public class AIStrategy
+{
+    public enum DecisionType
+    {
+        Shoot,
+        Pass,
+        Move,
+        Tackle,
+        EndTurn
+    }
+
+    public DecisionType decision;
+    public float score;
+    public AIPlayer targetPlayer;
+}
+
 public partial class AIPlayerController : MonoBehaviour
 {
     public static AIPlayerController instance;
@@ -77,467 +93,593 @@ public partial class AIPlayerController : MonoBehaviour
 
     public void SetUpTurn(bool turn)
     {
-        StartCoroutine(DelayAITurnStart(turn));
-    }
-
-    IEnumerator DelayAITurnStart(bool turn)
-    {
-        yield return new WaitForSeconds(1);
         isAITurn = turn;
         if (isAITurn)
         {
-            ActionData.Actions selectedState = SelectAIState();
-            foreach (var action in availableActions)
-            {
-                if (action.action == selectedState)
-                {
-                    currentAction = action;
-                    break;
-                }
-            }
-            
-            if(GameManager.instance.SpendActionPoints(currentAction.actionCost))
-                ExecuteState(selectedState);
+            StartCoroutine(DelayAITurnStart());
         }
     }
-    
-    private ActionData.Actions SelectAIState()
+
+    IEnumerator DelayAITurnStart()
     {
-        // Check if any AI has the ball
-        UpdateBallStatus();
-        
+        yield return new WaitForSeconds(1);
+        if (isAITurn) // Double check turn hasn't ended
+        {
+            StartCoroutine(PlayAITurn());
+        }
+    }
+
+    IEnumerator PlayAITurn()
+    {
+        while (isAITurn)
+        {
+            // Check if turn is still active
+            if (!isAITurn)
+            {
+                Debug.Log("AI: Turn ended, stopping execution");
+                break;
+            }
+
+            // Get best decision for current state
+            AIStrategy strategy = EvaluateBestMove();
+
+            if (strategy.decision == AIStrategy.DecisionType.EndTurn)
+            {
+                Debug.Log("AI: No more viable moves");
+                break;
+            }
+
+            // Execute the decided action
+            yield return StartCoroutine(ExecuteAction(strategy));
+
+            // Check if turn is still active after action
+            if (!isAITurn)
+            {
+                Debug.Log("AI: Turn ended during action execution");
+                break;
+            }
+
+            yield return new WaitForSeconds(0.3f);
+        }
+
+        // Final check to end turn properly
+        if (isAITurn)
+        {
+            isAITurn = false;
+            GameManager.instance.CheckEndTurn();
+        }
+    }
+
+    private AIStrategy EvaluateBestMove()
+    {
+        List<AIStrategy> strategies = new List<AIStrategy>();
+
+        // Evaluate all possible moves
         if (hasBall && currentAIWithBall != null)
         {
-            // AI has ball - check shoot condition first
-            GridTile currentTile = GridGenerator.instance.GetTile(currentAIWithBall.GetGridPosition().x, currentAIWithBall.GetGridPosition().y);
-            int distanceToGoal = GetTileDistance(currentTile, goalTile);
+            // AI has ball - prioritize scoring or advancing
+            EvaluateShoot(strategies);
+            EvaluatePass(strategies);
+            EvaluateMove(strategies);
+        }
+        else
+        {
+            // AI doesn't have ball - get it or move toward it
+            EvaluateTackle(strategies);
+            EvaluateMove(strategies);
+        }
+
+        // If no valid strategies, end turn
+        if (strategies.Count == 0)
+        {
+            return new AIStrategy { decision = AIStrategy.DecisionType.EndTurn, score = 0 };
+        }
+
+        // Return highest scoring strategy
+        AIStrategy best = strategies[0];
+        foreach (var strategy in strategies)
+        {
+            if (strategy.score > best.score)
+                best = strategy;
+        }
+
+        return best;
+    }
+
+    private void EvaluateShoot(List<AIStrategy> strategies)
+    {
+        if (!HasActionPoints(ActionData.Actions.Shoot))
+            return;
+
+        GridTile aiTile = GridGenerator.instance.GetTile(
+            currentAIWithBall.GetGridPosition().x, 
+            currentAIWithBall.GetGridPosition().y);
+        
+        int distToGoal = ManhattanDistance(aiTile.GridPosition, goalTile.GridPosition);
+
+        // Only shoot if within 2 tiles of goal
+        if (distToGoal <= 2)
+        {
+            float score = 1000 - (distToGoal * 100);
+            strategies.Add(new AIStrategy 
+            { 
+                decision = AIStrategy.DecisionType.Shoot, 
+                score = score,
+                targetPlayer = null
+            });
+            Debug.Log($"AI Shoot Option: Distance to goal {distToGoal}, Score: {score}");
+        }
+    }
+
+    private void EvaluatePass(List<AIStrategy> strategies)
+    {
+        if (!HasActionPoints(ActionData.Actions.Pass))
+            return;
+
+        AIPlayer passTarget = FindAdjacentTeammate();
+        
+        if (passTarget == null)
+            return;
+
+        float score = 0;
+
+        if (HasAdjacentEnemy(currentAIWithBall))
+        {
+            score = 800;
+            Debug.Log("AI Pass Option: Enemies nearby! Score: 800");
+        }
+        else
+        {
+            GridTile targetTile = GridGenerator.instance.GetTile(
+                passTarget.GetGridPosition().x, 
+                passTarget.GetGridPosition().y);
             
-            if (distanceToGoal <= 2)
+            int targetDistToGoal = ManhattanDistance(targetTile.GridPosition, goalTile.GridPosition);
+            int currentDistToGoal = ManhattanDistance(currentAIWithBall.GetGridPosition(), goalTile.GridPosition);
+
+            if (targetDistToGoal < currentDistToGoal)
             {
-                return ActionData.Actions.Shoot;
+                score = 300;
+                Debug.Log($"AI Pass Option: Target closer to goal. Score: {score}");
             }
+        }
+
+        if (score > 0)
+        {
+            strategies.Add(new AIStrategy 
+            { 
+                decision = AIStrategy.DecisionType.Pass, 
+                score = score,
+                targetPlayer = passTarget
+            });
+        }
+    }
+
+    private void EvaluateMove(List<AIStrategy> strategies)
+    {
+        if (!HasActionPoints(ActionData.Actions.Move))
+            return;
+
+        float score = 0;
+
+        if (hasBall && currentAIWithBall != null)
+        {
+            GridTile aiTile = GridGenerator.instance.GetTile(
+                currentAIWithBall.GetGridPosition().x, 
+                currentAIWithBall.GetGridPosition().y);
             
-            // Check if any enemy players within 2 tiles - ALWAYS pass if enemies nearby
-            if (AreEnemiesNearby(currentAIWithBall, 1))
+            int distToGoal = ManhattanDistance(aiTile.GridPosition, goalTile.GridPosition);
+
+            if (!HasAdjacentEnemy(currentAIWithBall))
             {
-                return ActionData.Actions.Pass;
+                score = 500 - (distToGoal * 50);
+                Debug.Log($"AI Move Option: Advancing toward goal. Distance: {distToGoal}, Score: {score}");
             }
             else
             {
-                return ActionData.Actions.Move; // Move towards goal
+                Debug.Log("AI Move Option: Blocked by enemies, low priority");
+                score = 100;
             }
         }
         else
         {
-            // AI doesn't have ball
-            // Check if ball is within 1 tile of any AI for tackle
-            
-            GridTile ballTile = GridGenerator.instance.GetTile(GameManager.instance.GetCurrentBallPosition().x, GameManager.instance.GetCurrentBallPosition().y);
-            AIPlayer closestAIToBall = GetClosestAIToBall(ballTile);
-            
-            if (closestAIToBall != null)
+            Vector2Int ballPos = GameManager.instance.GetCurrentBallPosition();
+            AIPlayer closestAI = GetClosestAIToBall();
+
+            if (closestAI != null)
             {
-                GridTile currentTile = GridGenerator.instance.GetTile(closestAIToBall.GetGridPosition().x, closestAIToBall.GetGridPosition().y);
-                int xDist = Mathf.Abs(currentTile.GridPosition.x - ballTile.GridPosition.x);
-                int yDist = Mathf.Abs(currentTile.GridPosition.y - ballTile.GridPosition.y);
-
-                if (xDist <= 1 && yDist <= 1)
-                {
-                    currentSelectedAI = closestAIToBall;
-                    return ActionData.Actions.Tackle;
-                }
+                int distToBall = ManhattanDistance(closestAI.GetGridPosition(), ballPos);
+                score = 400 - (distToBall * 50);
+                currentSelectedAI = closestAI;
+                Debug.Log($"AI Move Option: Moving toward ball. Distance: {distToBall}, Score: {score}");
             }
-            
-            // Select AI nearest to ball or player with ball and move
-            currentSelectedAI = GetBestAIToSelect(ballTile);
-            return ActionData.Actions.Move;
         }
-    }
-    
-    private void ExecuteState(ActionData.Actions state)
-    {
-        switch (state)
+
+        if (score > 0)
         {
-            case ActionData.Actions.Move:
-                ExecuteMove();
-                break;
-            case ActionData.Actions.Pass:
-                ExecutePass();
-                break;
-            case ActionData.Actions.Tackle:
-                ExecuteTackle();
-                break;
-            case ActionData.Actions.Shoot:
-                ExecuteShoot();
-                break;
-            case ActionData.Actions.Dash:
-                // Implement later
-                break;
+            strategies.Add(new AIStrategy 
+            { 
+                decision = AIStrategy.DecisionType.Move, 
+                score = score,
+                targetPlayer = null
+            });
         }
     }
 
-    IEnumerator EndTurn()
+    private void EvaluateTackle(List<AIStrategy> strategies)
     {
-        yield return new WaitForSeconds(1f);
-        
+        if (!HasActionPoints(ActionData.Actions.Tackle))
+            return;
+
+        Vector2Int ballPos = GameManager.instance.GetCurrentBallPosition();
+        GridTile ballTile = GridGenerator.instance.GetTile(ballPos.x, ballPos.y);
+
+        AIPlayer tackler = GetAIAdjacentToBall(ballTile);
+
+        if (tackler != null)
+        {
+            currentSelectedAI = tackler;
+            
+            int distToGoal = ManhattanDistance(ballPos, goalTile.GridPosition);
+            float score = 700 - (distToGoal * 50);
+            
+            strategies.Add(new AIStrategy 
+            { 
+                decision = AIStrategy.DecisionType.Tackle, 
+                score = score,
+                targetPlayer = tackler
+            });
+            Debug.Log($"AI Tackle Option: Ball near goal. Distance: {distToGoal}, Score: {score}");
+        }
     }
-    
-    private void ExecuteMove()
+
+    IEnumerator ExecuteAction(AIStrategy strategy)
     {
+        // Safety check: verify turn is still active
+        if (!isAITurn)
+            yield break;
+
+        switch (strategy.decision)
+        {
+            case AIStrategy.DecisionType.Shoot:
+                yield return StartCoroutine(ExecuteShoot());
+                break;
+            case AIStrategy.DecisionType.Pass:
+                yield return StartCoroutine(ExecutePass(strategy.targetPlayer));
+                break;
+            case AIStrategy.DecisionType.Move:
+                yield return StartCoroutine(ExecuteMove());
+                break;
+            case AIStrategy.DecisionType.Tackle:
+                yield return StartCoroutine(ExecuteTackle());
+                break;
+        }
+
+        // After action, check if we should continue
+        if (!isAITurn)
+        {
+            Debug.Log("AI: Turn became inactive after action");
+            yield break;
+        }
+    }
+
+    IEnumerator ExecuteMove()
+    {
+        if (!GameManager.instance.CheckActionPoints(GetActionCost(ActionData.Actions.Move)))
+        {
+            yield break;
+        }
+
         if (hasBall && currentAIWithBall != null)
         {
-            // Double check for enemies before moving - if found, pass instead
-            if (AreEnemiesNearby(currentAIWithBall, 1))
-            {
-                Debug.Log($"{currentAIWithBall.name} detected enemy, switching to pass");
-                ExecutePass();
-                return;
-            }
-
-            // Move 1 tile towards goal
-            Debug.Log($"{currentAIWithBall.name} moving towards goal");
-            GridTile currentTile = GridGenerator.instance.GetTile(currentAIWithBall.GetGridPosition().x, currentAIWithBall.GetGridPosition().y);
-            GridTile nextTile = GetNextTileTowards(currentTile, goalTile);
+            GridTile currentTile = GridGenerator.instance.GetTile(
+                currentAIWithBall.GetGridPosition().x, 
+                currentAIWithBall.GetGridPosition().y);
             
+            GridTile nextTile = GetNextTileToward(currentTile, goalTile);
+
             if (nextTile != null)
             {
+                Debug.Log($"{currentAIWithBall.name} moving toward goal");
                 MoveToTile(currentAIWithBall, nextTile);
                 GameManager.instance.SetBallPosition(nextTile.GridPosition);
-                
-            }
-            else
-            {
-                Debug.LogWarning($"{currentAIWithBall.name} has no valid move - ending turn");
-                StartCoroutine(EndTurn());
             }
         }
         else if (currentSelectedAI != null)
         {
-            // Move 1 tile towards ball
-            GridTile ballTile = GridGenerator.instance.GetTile(GameManager.instance.GetCurrentBallPosition().x, GameManager.instance.GetCurrentBallPosition().y);
-            Debug.Log($"{currentSelectedAI.name} moving towards ball");
-            GridTile currentTile = GridGenerator.instance.GetTile(currentSelectedAI.GetGridPosition().x, currentSelectedAI.GetGridPosition().y);
-            GridTile nextTile = GetNextTileTowards(currentTile, ballTile);
+            Vector2Int ballPos = GameManager.instance.GetCurrentBallPosition();
+            GridTile ballTile = GridGenerator.instance.GetTile(ballPos.x, ballPos.y);
             
+            GridTile currentTile = GridGenerator.instance.GetTile(
+                currentSelectedAI.GetGridPosition().x, 
+                currentSelectedAI.GetGridPosition().y);
+            
+            GridTile nextTile = GetNextTileToward(currentTile, ballTile);
+
             if (nextTile != null)
             {
+                Debug.Log($"{currentSelectedAI.name} moving toward ball");
                 MoveToTile(currentSelectedAI, nextTile);
             }
-            else
-            {
-                Debug.LogWarning($"{currentSelectedAI.name} has no valid move - ending turn");
-                StartCoroutine(EndTurn());
-            }
         }
+
+        yield return new WaitForSeconds(2f);
     }
-    
-    private void ExecutePass()
+
+    IEnumerator ExecutePass(AIPlayer receiver)
     {
-        if (currentAIWithBall != null)
+        if (!GameManager.instance.CheckActionPoints(GetActionCost(ActionData.Actions.Pass)))
         {
-            #region Play Animation
-
-            Animator animator = currentAIWithBall.GetComponentInChildren<Animator>();
-
-            AnimationManager.Instance.PassAnim(animator);
-
-            #endregion
-
-            AIPlayer bestReceiver = FindBestPassReceiver();
-            if (bestReceiver != null)
-            {
-                Debug.Log($"{currentAIWithBall.name} passing to {bestReceiver.name}");
-                GridTile targetTile = GridGenerator.instance.GetTile(bestReceiver.GetGridPosition().x, bestReceiver.GetGridPosition().y);
-                currentPassTargetAI = bestReceiver;
-                currentAIWithBall = bestReceiver;
-                StartCoroutine(MoveBallInArc(BallController.instance.gameObject.transform, targetTile.transform.position));
-            }
-            else
-            {
-                Debug.LogWarning("No valid pass receiver - ending turn");
-                StartCoroutine(EndTurn());
-            }
+            yield break;
         }
+
+        if (currentAIWithBall == null || receiver == null)
+            yield break;
+
+        Debug.Log($"{currentAIWithBall.name} passing to {receiver.name}");
+        
+        Animator animator = currentAIWithBall.GetComponentInChildren<Animator>();
+        AnimationManager.Instance.PassAnim(animator);
+
+        GridTile targetTile = GridGenerator.instance.GetTile(
+            receiver.GetGridPosition().x, 
+            receiver.GetGridPosition().y);
+
+        currentPassTargetAI = receiver;
+        yield return StartCoroutine(MoveBallInArc(
+            BallController.instance.gameObject.transform, 
+            targetTile.transform.position));
+
+        SetPlayerWithBall(receiver);
+        
+        yield return new WaitForSeconds(2f);
+    }
+
+    IEnumerator ExecuteTackle()
+    {
+        if (!GameManager.instance.CheckActionPoints(GetActionCost(ActionData.Actions.Tackle)))
+        {
+            yield break;
+        }
+
+        if (currentSelectedAI == null)
+            yield break;
+
+        Debug.Log($"{currentSelectedAI.name} tackling for the ball");
+        
+        Animator animator = currentSelectedAI.GetComponentInChildren<Animator>();
+        AnimationManager.Instance.TackleAnim(animator);
+
+        SetPlayerWithBall(currentSelectedAI);
+        PlayerController.instance.RemovePlayerWithBall();
+        GameManager.instance.SetBallPosition(currentSelectedAI.GetGridPosition());
+
+        yield return new WaitForSeconds(2f);
+    }
+
+    IEnumerator ExecuteShoot()
+    {
+        if (!GameManager.instance.CheckActionPoints(GetActionCost(ActionData.Actions.Shoot)))
+        {
+            yield break;
+        }
+
+        if (currentAIWithBall == null)
+            yield break;
+
+        Debug.Log($"{currentAIWithBall.name} shooting at goal!");
+        
+        Animator animator = currentAIWithBall.GetComponentInChildren<Animator>();
+        AnimationManager.Instance.ShootAnim(animator);
+
+        GameObject ball = GameManager.instance.GetBallObject();
+        Transform goalTileTrans = GameManager.instance.GetAIGoalTile().transform;
+
+        yield return StartCoroutine(MoveBallToShoot(
+            ball.transform, 
+            new Vector3(goalTileTrans.position.x, goalTileTrans.position.y, goalTileTrans.position.z)));
+
+        UIManager.instance.AddAIScore(1);
+        GameManager.instance.ResetRound();
     }
 
     public IEnumerator MoveBallInArc(Transform ball, Vector3 targetPosition, float arcHeight = 2f, float duration = 1f)
     {
-        DebugLogger.Log("Moving ball to target", "red");
         Vector3 startPos = ball.transform.position;
-        Vector3 endPos = targetPosition;
-
         float elapsed = 0f;
-
-        Vector3 forwardDir = (endPos - startPos).normalized;
-        Vector3 sideDir = Vector3.Cross(Vector3.up, forwardDir); 
 
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
             float t = Mathf.Clamp01(elapsed / duration);
-
             float smoothT = Mathf.Pow(t, 5f);
 
-            Vector3 pos = Vector3.Lerp(startPos, endPos, smoothT);
-
+            Vector3 pos = Vector3.Lerp(startPos, targetPosition, smoothT);
             float heightOffset = Mathf.Sin(smoothT * Mathf.PI) * arcHeight;
-            
             pos.y += heightOffset + 0.3f;
 
             ball.position = pos;
-
             yield return null;
         }
 
         ball.position = targetPosition;
-        SetPlayerWithBall(currentPassTargetAI);
-        StartCoroutine(EndTurn());
-        // Ensure we end exactly at target
     }
-    
-    private void ExecuteTackle()
-    {
-        if (currentSelectedAI != null)
-        {
-            #region Play Animation
 
-            Animator animator = currentSelectedAI.GetComponentInChildren<Animator>();
-
-            AnimationManager.Instance.TackleAnim(animator);
-
-            #endregion
-
-            Debug.Log($"{currentSelectedAI.name} attempting tackle");
-            SetPlayerWithBall(currentSelectedAI);
-            StartCoroutine(DelayAfterTackle());
-        }
-    }
-    
-    private void ExecuteShoot()
-    {
-        if (currentAIWithBall != null)
-        {
-            #region Play Animation
-
-            Animator animator = currentAIWithBall.GetComponentInChildren<Animator>();
-
-            AnimationManager.Instance.ShootAnim(animator);
-
-            #endregion
-
-            Debug.Log($"{currentAIWithBall.name} shooting at goal");
-            GameObject ball = GameManager.instance.GetBallObject();
-            Transform goalTile = GameManager.instance.GetAIGoalTile().transform;
-            StartCoroutine(MoveBallToShoot(ball.transform, new Vector3(goalTile.position.x,goalTile.position.y,goalTile.position.z)));
-        }
-    }
-    
     public IEnumerator MoveBallToShoot(Transform ball, Vector3 targetPosition, float arcHeight = 2f, float duration = 1f)
     {
-        DebugLogger.Log("Moving ball to target", "red");
         Vector3 startPos = ball.transform.position;
-        Vector3 endPos = targetPosition;
-
         float elapsed = 0f;
-
-        Vector3 forwardDir = (endPos - startPos).normalized;
-        Vector3 sideDir = Vector3.Cross(Vector3.up, forwardDir); 
 
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
             float t = Mathf.Clamp01(elapsed / duration);
-
             float smoothT = Mathf.Pow(t, 5f);
 
-            Vector3 pos = Vector3.Lerp(startPos, endPos, smoothT);
-
+            Vector3 pos = Vector3.Lerp(startPos, targetPosition, smoothT);
             float heightOffset = Mathf.Sin(smoothT * Mathf.PI) * arcHeight;
-            
             pos.y += heightOffset + 0.3f;
 
             ball.position = pos;
-
             yield return null;
         }
 
         ball.position = targetPosition;
-        UIManager.instance.AddAIScore(1);
-        GameManager.instance.ResetRound();
-        // Ensure we end exactly at target
     }
-    
-    // Helper methods
-    private void UpdateBallStatus()
+
+    // === Helper Methods ===
+
+    private int ManhattanDistance(Vector2Int pos1, Vector2Int pos2)
     {
-        // This should be called to update which AI has the ball
-        // You'll need to implement this based on your ball system
-        // For now, just check the hasBall boolean you're already setting
+        return Mathf.Abs(pos1.x - pos2.x) + Mathf.Abs(pos1.y - pos2.y);
     }
-    
-    private bool AreEnemiesNearby(AIPlayer ai, int range)
+
+    private bool HasActionPoints(ActionData.Actions action)
     {
-        GridTile aiTile = GridGenerator.instance.GetTile(ai.GetGridPosition().x, ai.GetGridPosition().y);
-        int x = aiTile.GridPosition.x;
-        int y = aiTile.GridPosition.y;
-        
-        Vector2Int[] directions = new Vector2Int[]
+        return GetActionCost(action) > 0;
+    }
+
+    private int GetActionCost(ActionData.Actions action)
+    {
+        foreach (var actionData in availableActions)
         {
-            new Vector2Int(1, 0),   // right
-            new Vector2Int(-1, 0),  // left
-            new Vector2Int(0, 1),   // up
-            new Vector2Int(0, -1),  // down
-            new Vector2Int(1, 1),   // top right
-            new Vector2Int(-1, 1),  // top left
-            new Vector2Int(1, -1),  // bottom right
-            new Vector2Int(-1, -1), // bottom left
-        };
-        
-        DebugLogger.Log($"AI with ball position {ai.GetGridPosition()}", "blue");
-    
+            if (actionData.action == action)
+                return actionData.actionCost;
+        }
+        return 0;
+    }
+
+    private AIPlayer FindAdjacentTeammate()
+    {
+        Vector2Int[] directions = GetAdjacentDirections();
+
+        foreach (var dir in directions)
+        {
+            Vector2Int checkPos = currentAIWithBall.GetGridPosition() + dir;
+            GridTile tile = GridGenerator.instance.GetTile(checkPos.x, checkPos.y);
+            
+            if (tile != null && tile.IsOccupied())
+            {
+                AIPlayer occupant = GetAIAtPosition(checkPos);
+                if (occupant != null && occupant != currentAIWithBall)
+                    return occupant;
+            }
+        }
+
+        return null;
+    }
+
+    private bool HasAdjacentEnemy(AIPlayer ai)
+    {
+        Vector2Int[] directions = GetAdjacentDirections();
+
         foreach (var dir in directions)
         {
             Vector2Int checkPos = ai.GetGridPosition() + dir;
             GridTile tile = GridGenerator.instance.GetTile(checkPos.x, checkPos.y);
+            
             if (tile != null && tile.IsOccupied())
             {
-                return true;
+                AIPlayer occupant = GetAIAtPosition(checkPos);
+                if (occupant != null && occupant != ai)
+                    return true;
             }
         }
 
         return false;
     }
-    
-    private AIPlayer GetClosestAIToBall(GridTile ballTile)
+
+    private AIPlayer GetAIAdjacentToBall(GridTile ballTile)
     {
+        Vector2Int[] directions = GetAdjacentDirections();
+
+        foreach (var dir in directions)
+        {
+            Vector2Int checkPos = ballTile.GridPosition + dir;
+            AIPlayer ai = GetAIAtPosition(checkPos);
+            if (ai != null)
+                return ai;
+        }
+
+        return null;
+    }
+
+    private AIPlayer GetClosestAIToBall()
+    {
+        Vector2Int ballPos = GameManager.instance.GetCurrentBallPosition();
         AIPlayer closest = null;
         int minDist = int.MaxValue;
-        
+
         foreach (AIPlayer ai in ais)
         {
             if (ai == null) continue;
             
-            GridTile aiTile = GridGenerator.instance.GetTile(ai.GetGridPosition().x, ai.GetGridPosition().y);
-            int dist = GetTileDistance(aiTile, ballTile);
+            int dist = ManhattanDistance(ai.GetGridPosition(), ballPos);
             if (dist < minDist)
             {
                 minDist = dist;
                 closest = ai;
             }
         }
-        
+
         return closest;
     }
-    
-    private AIPlayer GetBestAIToSelect(GridTile ballTile)
+
+    private AIPlayer GetAIAtPosition(Vector2Int pos)
     {
-        // Select AI nearest to ball
-        return GetClosestAIToBall(ballTile);
-    }
-    
-    private AIPlayer FindBestPassReceiver()
-    {
-        AIPlayer bestReceiver = null;
-        int bestScore = int.MinValue;
-        
         foreach (AIPlayer ai in ais)
         {
-            if (ai == null || ai == currentAIWithBall) continue;
-            
-            // Skip if this AI has enemies nearby (within 2 tiles)
-            if (AreEnemiesNearby(ai, 2))
-            {
-                Debug.Log($"Skipping {ai.name} as pass target - enemies nearby");
-                continue;
-            }
-            
-            // Calculate score based on distance to goal and being open
-            GridTile aiTile = GridGenerator.instance.GetTile(ai.GetGridPosition().x, ai.GetGridPosition().y);
-            int distToGoal = GetTileDistance(aiTile, goalTile);
-            int score = 100 - distToGoal; // Closer to goal = better
-            
-            // Bonus for being in open space
-            score += 20;
-            
-            if (score > bestScore)
-            {
-                bestScore = score;
-                bestReceiver = ai;
-            }
+            if (ai != null && ai.GetGridPosition() == pos)
+                return ai;
         }
-        
-        return bestReceiver;
-    }
-    
-    // Grid-based pathfinding helpers
-    private GridTile GetNextTileTowards(GridTile from, GridTile to)
-    {
-        int dx = to.GridPosition.x - from.GridPosition.x;
-        int dy = to.GridPosition.y - from.GridPosition.y;
-        
-        // Normalize to get direction (-1, 0, or 1)
-        int moveX = dx != 0 ? (dx > 0 ? 1 : -1) : 0;
-        int moveY = dy != 0 ? (dy > 0 ? 1 : -1) : 0;
-        
-        // Try diagonal first if both x and y need movement
-        if (moveX != 0 && moveY != 0)
-        {
-            GridTile diagonalTile = GridGenerator.instance.GetTile(from.GridPosition.x + moveX, from.GridPosition.y + moveY);
-            if (diagonalTile != null && !diagonalTile.IsOccupied())
-            {
-                return diagonalTile;
-            }
-        }
-        
-        // Try horizontal movement
-        if (moveX != 0)
-        {
-            GridTile horizontalTile = GridGenerator.instance.GetTile(from.GridPosition.x + moveX, from.GridPosition.y);
-            if (horizontalTile != null && !horizontalTile.IsOccupied())
-            {
-                return horizontalTile;
-            }
-        }
-        
-        // Try vertical movement
-        if (moveY != 0)
-        {
-            GridTile verticalTile = GridGenerator.instance.GetTile(from.GridPosition.x, from.GridPosition.y + moveY);
-            if (verticalTile != null && !verticalTile.IsOccupied())
-            {
-                return verticalTile;
-            }
-        }
-        
-        return null; // No valid tile found
-    }
-    
-    private int GetTileDistance(GridTile tile1, GridTile tile2)
-    {
-        // Manhattan distance
-        int dx = Mathf.Abs(tile1.GridPosition.x - tile2.GridPosition.x);
-        int dy = Mathf.Abs(tile1.GridPosition.y - tile2.GridPosition.y);
-        return dx + dy;
-    }
-    
-    IEnumerator DelayAfterTackle()
-    {
-        yield return new WaitForSeconds(0.5f);
-        foreach (var action in availableActions)
-        {
-            if (action.action == ActionData.Actions.Move)
-            {
-                currentAction = action;
-                break;
-            }
-        }
-        
-        if(GameManager.instance.SpendActionPoints(currentAction.actionCost))
-            ExecuteState(currentAction.action);
+        return null;
     }
 
-    IEnumerator ResetRound()
+    private GridTile GetNextTileToward(GridTile from, GridTile to)
     {
-        yield return new WaitForSeconds(1f);
+        Vector2Int dir = to.GridPosition - from.GridPosition;
+        int moveX = dir.x != 0 ? (dir.x > 0 ? 1 : -1) : 0;
+        int moveY = dir.y != 0 ? (dir.y > 0 ? 1 : -1) : 0;
+
+        // Try diagonal
+        if (moveX != 0 && moveY != 0)
+        {
+            GridTile diag = GridGenerator.instance.GetTile(from.GridPosition.x + moveX, from.GridPosition.y + moveY);
+            if (diag != null && !diag.IsOccupied())
+                return diag;
+        }
+
+        // Try horizontal
+        if (moveX != 0)
+        {
+            GridTile horiz = GridGenerator.instance.GetTile(from.GridPosition.x + moveX, from.GridPosition.y);
+            if (horiz != null && !horiz.IsOccupied())
+                return horiz;
+        }
+
+        // Try vertical
+        if (moveY != 0)
+        {
+            GridTile vert = GridGenerator.instance.GetTile(from.GridPosition.x, from.GridPosition.y + moveY);
+            if (vert != null && !vert.IsOccupied())
+                return vert;
+        }
+
+        return null;
+    }
+
+    private Vector2Int[] GetAdjacentDirections()
+    {
+        return new Vector2Int[]
+        {
+            new Vector2Int(1, 0),
+            new Vector2Int(-1, 0),
+            new Vector2Int(0, 1),
+            new Vector2Int(0, -1),
+            new Vector2Int(1, 1),
+            new Vector2Int(-1, 1),
+            new Vector2Int(1, -1),
+            new Vector2Int(-1, -1)
+        };
     }
 }

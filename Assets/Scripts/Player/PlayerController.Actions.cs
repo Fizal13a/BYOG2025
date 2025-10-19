@@ -59,6 +59,7 @@ public partial class PlayerController : MonoBehaviour
 
         #endregion
 
+        GameManager.instance.CheckEndTurn();
         currentSelectedPlayer = null;
     }
 
@@ -76,8 +77,7 @@ public partial class PlayerController : MonoBehaviour
         AnimationManager.Instance.PassAnim(animator);
 
         #endregion
-
-
+        
         foreach (var player in players)
         {
             if (player.GetGridPosition() == tile.GridPosition)
@@ -147,6 +147,7 @@ public partial class PlayerController : MonoBehaviour
         // Snap to final position
         ball.transform.position = new Vector3(endPos.x, endPos.y + 0.05f, endPos.z);
         SetPlayerWithBall(currentPlayerWithBall);
+        GameManager.instance.CheckEndTurn();
     }
 
     #endregion
@@ -167,10 +168,10 @@ public partial class PlayerController : MonoBehaviour
         Vector2Int playerGridPos = currentSelectedPlayer.GetGridPosition();
         GameManager.instance.SetBallPosition(playerGridPos);
         SetPlayerWithBall(currentSelectedPlayer);
-        HandleStates(ActionData.Actions.Move);
         AIPlayerController.instance.RemoveBall();
         
         ToggleUI(false);
+        GameManager.instance.CheckEndTurn();
     }
 
     #endregion

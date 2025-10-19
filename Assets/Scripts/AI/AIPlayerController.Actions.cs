@@ -45,11 +45,7 @@ public partial class AIPlayerController : MonoBehaviour
 
         currentplayer.SetGridPosition(targetTile.GridPosition);
         DebugLogger.Log($"Target Tile {targetTile.GridPosition}, Ball Position {GameManager.instance.GetCurrentBallPosition()}", "red");
-        if (targetTile.GridPosition == GameManager.instance.GetCurrentBallPosition())
-        {
-            //SetPlayerWithBall(currentplayer);
-        }
-
+       
         #region Play Animation
 
         AnimationManager.Instance.MoveAnim(animator, false);
@@ -58,8 +54,5 @@ public partial class AIPlayerController : MonoBehaviour
 
 
         currentSelectedAI = null;
-        //GameManager.instance.EndTurnEarly();
-
-        StartCoroutine(EndTurn());
     }
 }
