@@ -118,14 +118,6 @@ public partial class GameManager : MonoBehaviour
         activeTeam.UseActionPoints(cost);
         UpdateActionPointUI(activeTeam.CurrentAP);
         
-        Debug.Log($"Action executed. Remaining AP: {activeTeam.CurrentAP}");
-
-        // Check immediately if this was the last action point
-        if (activeTeam.CurrentAP <= 0)
-        {
-            StartCoroutine(DelayedEndTurn());
-        }
-        
         return true;
     }
 

@@ -354,6 +354,8 @@ public partial class AIPlayerController : MonoBehaviour
                 yield return StartCoroutine(ExecuteTackle());
                 break;
         }
+        
+        GameManager.instance.CheckEndTurn();
 
         // After action, check if we should continue
         if (!isAITurn)
