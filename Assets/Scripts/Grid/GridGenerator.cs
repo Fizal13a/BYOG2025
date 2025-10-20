@@ -29,7 +29,6 @@ public class GridGenerator : MonoBehaviour
         }
     }
 
-    [ContextMenu("Generate Grid")]
     public void GenerateGrid()
     {
         if (gameSettings.tilePrefab == null)
@@ -78,6 +77,42 @@ public class GridGenerator : MonoBehaviour
                     goal.transform.SetParent(tile.transform);
                     GameManager.instance.SetPlayerGoalTile(tileScript);
                 }
+
+                // Store in array
+                grid[x, y] = tile;
+            }
+        }
+    }
+    
+    [ContextMenu("Generate Grid")]
+    // --- Context menu use only --- 
+    public void DebugGridCreation()
+    {
+          if (gameSettings.tilePrefab == null)
+        {
+            Debug.LogWarning("No tile prefab assigned!");
+            return;
+        }
+        
+        ClearGrid();
+        
+        int width = gameSettings.gridWidth;
+        int height = gameSettings.gridHeight;
+        float spacing = gameSettings.spacing;
+        GameObject tilePrefab = gameSettings.tilePrefab;
+        GameObject goalPost = gameSettings.goalPost;
+
+        grid = new GameObject[width, height];
+        gridTiles = new GridTile[width, height];
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                Vector3 position = new Vector3(x * spacing, 0f, y * spacing);
+                GameObject tile = Instantiate(tilePrefab, position, Quaternion.identity, transform);
+                tile.name = $"Tile_{x}_{y}";
+                tile.transform.SetParent(gridParent);
 
                 // Store in array
                 grid[x, y] = tile;

@@ -68,7 +68,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 95af8789607276b4ab0c43389b02a760, type: 2}
+  - {fileID: 2100000, guid: efe26027cacc84b409062a6cff9b90c4, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -124,5 +124,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 984d6f621236d7b47bff53a8bfc73020, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GridTile
+  occupyingEntity: {fileID: 0}
   GridPosition: {x: 0, y: 0}
   IsWalkable: 1
+  neighbors: []
+  gCost: 0
+  hCost: 0
+  parent: {fileID: 0}

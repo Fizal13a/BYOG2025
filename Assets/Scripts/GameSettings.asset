@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameSettings
   turnDuration: 20
   gridHeight: 9
-  gridWidth: 7
+  gridWidth: 5
   spacing: 1
   tilePrefab: {fileID: 3036765420898129337, guid: d28cd825f6b775740834fe20c9fb2987, type: 3}
   goalPost: {fileID: 3518260784281722344, guid: b338c18997aba794c80929b9c0fe8805, type: 3}
