@@ -32,12 +32,16 @@ public partial class GameManager : MonoBehaviour
     // Internal storage
     private GameObject[] players;
     private GameObject[] aiPlayers;
-    private GameObject ball;
+    public GameObject ball;
     
     [Header("Runtime Datas")]
     private Player currentPlayerWithBall;
     private AIPlayer currentAIWithBall;
     private Vector2Int currentBallPosition;
+
+        [Header("Camera Info")]
+    [SerializeField] CinemachineCamera cine_camera;
+    [SerializeField] Vector3 initialPosition;
 
     private GridTile playerGoalTile;
     private GridTile aiGoalTile;
@@ -52,14 +56,12 @@ public partial class GameManager : MonoBehaviour
         {
             instance = this;
         }
-    }
 
-    void Start()
-    {
         // --- All initializing goes here --- 
         SetUpTurnStates();
         InitializeMatch();
     }
+
 
     void InitializeMatch()
     {

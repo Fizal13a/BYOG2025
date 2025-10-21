@@ -756,6 +756,51 @@ MonoBehaviour:
       m_PostInfinity: 2
       m_RotationOrder: 4
   CustomBlends: {fileID: 0}
+--- !u!1 &142848131
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 142848132}
+  - component: {fileID: 142848133}
+  m_Layer: 0
+  m_Name: CameraManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &142848132
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 142848131}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 756562073}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &142848133
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 142848131}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 807c5f1edbc2eec44add44b20171b197, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraManager
+  cine_camera: {fileID: 2107372198}
 --- !u!43 &160755247
 Mesh:
   m_ObjectHideFlags: 0
@@ -3966,6 +4011,7 @@ Transform:
   - {fileID: 895060451}
   - {fileID: 108794207}
   - {fileID: 1857454174}
+  - {fileID: 142848132}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &758924040
@@ -6069,6 +6115,9 @@ MonoBehaviour:
   playerTeamGoalPos: {x: 2, y: 8}
   playerController: {fileID: 1712556749}
   aiPlayerController: {fileID: 783325683}
+  ball: {fileID: 0}
+  cine_camera: {fileID: 0}
+  initialPosition: {x: 0, y: 0, z: 0}
   turnDisplayText: {fileID: 1921553497}
   turnTimerText: {fileID: 1196437126}
   actionPointsText: {fileID: 286973094}
@@ -7449,9 +7498,9 @@ MonoBehaviour:
   tileLayer:
     serializedVersion: 2
     m_Bits: 128
+  currentSelectedPlayer: {fileID: 0}
   currentPlayerWithBall: {fileID: 0}
   currentPassTargetPlayer: {fileID: 0}
-  cine_camera: {fileID: 2107372198}
   playerUIPanel: {fileID: 2070001168}
   moveButton: {fileID: 550176304}
   passButton: {fileID: 1965325827}
@@ -9133,7 +9182,7 @@ MonoBehaviour:
       Curvature: {x: 2, y: 11}
       BarrelClipping: 0.25
       Anamorphism: 0
-  BlendHint: 0
+  BlendHint: 33
 --- !u!114 &2107372199
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9157,7 +9206,7 @@ MonoBehaviour:
       Offset: {x: 0, y: 0}
   CenterOnActivate: 1
   TargetOffset: {x: 0, y: 0, z: 0}
-  Damping: {x: 0.02, y: 0.2}
+  Damping: {x: 2, y: 2}
   Lookahead:
     Enabled: 0
     Time: 0

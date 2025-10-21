@@ -20,12 +20,9 @@ public partial class PlayerController : MonoBehaviour
     public LayerMask tileLayer;
     
     [Header("Turn Data")]
-    private Player currentSelectedPlayer;
+    public Player currentSelectedPlayer;
     public  Player currentPlayerWithBall;
     public Player currentPassTargetPlayer;
-
-    [Header("Camera Info")]
-    [SerializeField] CinemachineCamera cine_camera;
 
     private bool isPlayerTurn = false;
 
@@ -95,9 +92,6 @@ public partial class PlayerController : MonoBehaviour
 
         // --- Raycast to select the player ---
         HandlePlayerSelection();
-
-        // --- Camera Positon
-        SetCameraTarget();
     }
     
     private void HandlePlayerSelection()
@@ -122,29 +116,4 @@ public partial class PlayerController : MonoBehaviour
         }
     }
 
-    #region Cinemachine camera Target
-    private void SetCameraTarget()
-    {
-        if(currentSelectedPlayer!=null)
-        {
-            cine_camera.LookAt = currentSelectedPlayer.transform;
-            cine_camera.Follow = currentSelectedPlayer.transform;
-        }
-        else
-        {
-            //ResetCamPos();
-        }
-
-    }
-
-    private void ResetCamPos()
-    {
-        cine_camera.LookAt = null;
-        cine_camera.Follow = null;
-
-        cine_camera.transform.position = new Vector3(0, 0, -25f);
-        cine_camera.transform.rotation = Quaternion.identity;
-    }
-
-    #endregion
 }
