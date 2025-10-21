@@ -1937,7 +1937,7 @@ MeshCollider:
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: 1420938963}
+  m_Mesh: {fileID: 2063251452}
 --- !u!33 &339259499
 MeshFilter:
   m_ObjectHideFlags: 10
@@ -4986,7 +4986,7 @@ GameObject:
   m_Component:
   - component: {fileID: 990380722}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: Camera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6117,7 +6117,7 @@ MeshCollider:
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: 1331815704}
+  m_Mesh: {fileID: 160755247}
 --- !u!33 &1495834265
 MeshFilter:
   m_ObjectHideFlags: 10
@@ -7451,6 +7451,7 @@ MonoBehaviour:
     m_Bits: 128
   currentPlayerWithBall: {fileID: 0}
   currentPassTargetPlayer: {fileID: 0}
+  cine_camera: {fileID: 2107372198}
   playerUIPanel: {fileID: 2070001168}
   moveButton: {fileID: 550176304}
   passButton: {fileID: 1965325827}
@@ -9067,6 +9068,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2107372197}
   - component: {fileID: 2107372198}
+  - component: {fileID: 2107372199}
   m_Layer: 0
   m_Name: CinemachineCamera
   m_TagString: Untagged
@@ -9132,6 +9134,35 @@ MonoBehaviour:
       BarrelClipping: 0.25
       Anamorphism: 0
   BlendHint: 0
+--- !u!114 &2107372199
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2107372196}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f38bda98361e1de48a4ca2bd86ea3c17, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineRotationComposer
+  Composition:
+    ScreenPosition: {x: 0, y: 0}
+    DeadZone:
+      Enabled: 0
+      Size: {x: 0.2, y: 0.2}
+    HardLimits:
+      Enabled: 0
+      Size: {x: 0.8, y: 0.8}
+      Offset: {x: 0, y: 0}
+  CenterOnActivate: 1
+  TargetOffset: {x: 0, y: 0, z: 0}
+  Damping: {x: 0.02, y: 0.2}
+  Lookahead:
+    Enabled: 0
+    Time: 0
+    Smoothing: 0
+    IgnoreY: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

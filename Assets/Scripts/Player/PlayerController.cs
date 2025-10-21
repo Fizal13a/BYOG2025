@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -22,7 +23,10 @@ public partial class PlayerController : MonoBehaviour
     private Player currentSelectedPlayer;
     public  Player currentPlayerWithBall;
     public Player currentPassTargetPlayer;
-    
+
+    [Header("Camera Info")]
+    [SerializeField] CinemachineCamera cine_camera;
+
     private bool isPlayerTurn = false;
 
     #region Initialization
@@ -91,6 +95,9 @@ public partial class PlayerController : MonoBehaviour
 
         // --- Raycast to select the player ---
         HandlePlayerSelection();
+
+        // --- Camera Positon
+        SetCameraTarget();
     }
     
     private void HandlePlayerSelection()
@@ -114,4 +121,30 @@ public partial class PlayerController : MonoBehaviour
             }
         }
     }
+
+    #region Cinemachine camera Target
+    private void SetCameraTarget()
+    {
+        if(currentSelectedPlayer!=null)
+        {
+            cine_camera.LookAt = currentSelectedPlayer.transform;
+            cine_camera.Follow = currentSelectedPlayer.transform;
+        }
+        else
+        {
+            //ResetCamPos();
+        }
+
+    }
+
+    private void ResetCamPos()
+    {
+        cine_camera.LookAt = null;
+        cine_camera.Follow = null;
+
+        cine_camera.transform.position = new Vector3(0, 0, -25f);
+        cine_camera.transform.rotation = Quaternion.identity;
+    }
+
+    #endregion
 }

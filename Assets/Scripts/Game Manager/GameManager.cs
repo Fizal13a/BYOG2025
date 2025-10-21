@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using System.Collections;
 using Random = UnityEngine.Random;
+using Unity.Cinemachine;
 
 public partial class GameManager : MonoBehaviour
 {
