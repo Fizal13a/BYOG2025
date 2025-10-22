@@ -25,7 +25,7 @@ public class CameraManager : MonoBehaviour
     {
         ball = GameManager.instance.ball.transform;
 
-        //cine_camera.LookAt = ball;
+        cine_camera.LookAt = ball;
         cine_camera.Follow = ball;
     }
 
@@ -39,7 +39,7 @@ public class CameraManager : MonoBehaviour
         {
             Transform currentSelectedPlayer = PlayerController.instance.currentSelectedPlayer.transform;
 
-            //cine_camera.LookAt = currentSelectedPlayer;
+            cine_camera.LookAt = currentSelectedPlayer;
             cine_camera.Follow = currentSelectedPlayer;
         }
         else
