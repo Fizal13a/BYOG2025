@@ -6,8 +6,8 @@ public class CameraManager : MonoBehaviour
     [Header("Camera reference")]
     [SerializeField] CinemachineCamera cine_camera;
 
-    [Header("Ball refernce")]
-    Transform ball;
+    [Header("Centerpoint refernce")]
+    [SerializeField] Transform centerPoint;
     void Start()
     {
         SetInitialPos();
@@ -23,10 +23,9 @@ public class CameraManager : MonoBehaviour
 
     private void SetInitialPos()
     {
-        ball = GameManager.instance.ball.transform;
 
-        cine_camera.LookAt = ball;
-        cine_camera.Follow = ball;
+        cine_camera.LookAt = centerPoint;
+        cine_camera.Follow = centerPoint;
     }
 
     #endregion
@@ -51,10 +50,8 @@ public class CameraManager : MonoBehaviour
 
     private void ResetCamPos()
     {
-        cine_camera.LookAt = null;
-        cine_camera.Follow = null;
-
-        cine_camera.transform.localRotation = Quaternion.Slerp(cine_camera.transform.localRotation, Quaternion.identity, Time.deltaTime);
+        cine_camera.LookAt = centerPoint;
+        cine_camera.Follow = centerPoint;
     }
 
     #endregion

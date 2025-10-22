@@ -979,6 +979,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraManager
   cine_camera: {fileID: 2107372198}
+  centerPoint: {fileID: 1712528867}
 --- !u!1 &176822622
 GameObject:
   m_ObjectHideFlags: 0
@@ -1795,6 +1796,11 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!4 &344900562 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4815129559751072982, guid: 30709616f24fb7b4a8c9af02ea7f3d80, type: 3}
+  m_PrefabInstance: {fileID: 406857799}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &350305112
 GameObject:
   m_ObjectHideFlags: 0
@@ -2018,7 +2024,10 @@ PrefabInstance:
       objectReference: {fileID: 1310167346}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 4815129559751072982, guid: 30709616f24fb7b4a8c9af02ea7f3d80, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1712528867}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 30709616f24fb7b4a8c9af02ea7f3d80, type: 3}
 --- !u!1 &422670761
@@ -4809,8 +4818,6 @@ MonoBehaviour:
   playerController: {fileID: 1712556749}
   aiPlayerController: {fileID: 783325683}
   ball: {fileID: 0}
-  cine_camera: {fileID: 0}
-  initialPosition: {x: 0, y: 0, z: 0}
   turnDisplayText: {fileID: 1921553497}
   turnTimerText: {fileID: 1196437126}
   actionPointsText: {fileID: 286973094}
@@ -5124,6 +5131,37 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1664645318}
   m_CullTransparentMesh: 1
+--- !u!1 &1712528866
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1712528867}
+  m_Layer: 0
+  m_Name: Center point
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1712528867
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1712528866}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.18, y: 0, z: 2.442}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 344900562}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1712556747
 GameObject:
   m_ObjectHideFlags: 0

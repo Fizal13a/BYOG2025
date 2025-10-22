@@ -10,19 +10,20 @@ public partial class PlayerController : MonoBehaviour
     {
         DebugLogger.Log($"Moving to tile {targetTile.gameObject.name}");
 
-        #region Play Animation
-        Animator animator = currentSelectedPlayer.GetComponentInChildren<Animator>();
+        //#region Play Animation
+        //Animator animator = currentSelectedPlayer.GetComponentInChildren<Animator>();
 
-        AnimationManager.Instance.MoveAnim(animator, true);
+        //AnimationManager.Instance.MoveAnim(animator, true);
 
-        #endregion
+        //#endregion
 
-        StartCoroutine(MoveToTileRoutine(animator,targetTile));
+        //StartCoroutine(MoveToTileRoutine(animator,targetTile));
+        StartCoroutine(MoveToTileRoutine(targetTile));
         
         ToggleUI(false);
     }
     
-    private IEnumerator MoveToTileRoutine(Animator animator, GridTile targetTile)
+    private IEnumerator MoveToTileRoutine(GridTile targetTile)
     {
         GridTile currentTile = GridGenerator.instance.GetTile(currentSelectedPlayer.GetGridPosition().x, currentSelectedPlayer.GetGridPosition().y);
         currentTile.SetOccupied(false);
@@ -53,11 +54,11 @@ public partial class PlayerController : MonoBehaviour
             GameManager.instance.SetBallPosition(targetTile.GridPosition);
         }
 
-        #region Play Animation
+        //#region Play Animation
 
-        AnimationManager.Instance.MoveAnim(animator, false);
+        //AnimationManager.Instance.MoveAnim(animator, false);
 
-        #endregion
+        //#endregion
 
         GameManager.instance.CheckEndTurn();
         currentSelectedPlayer = null;
@@ -71,12 +72,12 @@ public partial class PlayerController : MonoBehaviour
 
     private void PassToPlayer(GridTile tile)
     {
-        #region Play Animation
+        //#region Play Animation
 
-        Animator animator = currentPlayerWithBall.GetComponentInChildren<Animator>();
-        AnimationManager.Instance.PassAnim(animator);
+        //Animator animator = currentPlayerWithBall.GetComponentInChildren<Animator>();
+        //AnimationManager.Instance.PassAnim(animator);
 
-        #endregion
+        //#endregion
         
         foreach (var player in players)
         {
@@ -158,12 +159,12 @@ public partial class PlayerController : MonoBehaviour
 
     private void Tackle()
     {
-        #region Play Animation
+        //#region Play Animation
 
-        Animator animator = currentSelectedPlayer.GetComponentInChildren<Animator>();
-        AnimationManager.Instance.TackleAnim(animator);
+        //Animator animator = currentSelectedPlayer.GetComponentInChildren<Animator>();
+        //AnimationManager.Instance.TackleAnim(animator);
 
-        #endregion
+        //#endregion
 
         Vector2Int playerGridPos = currentSelectedPlayer.GetGridPosition();
         GameManager.instance.SetBallPosition(playerGridPos);
@@ -183,12 +184,12 @@ public partial class PlayerController : MonoBehaviour
     private void ShootToGoal()
     {
 
-        #region Play Animation
+        //#region Play Animation
 
-        Animator animator = currentPlayerWithBall.GetComponentInChildren<Animator>();
-        AnimationManager.Instance.ShootAnim(animator);
+        //Animator animator = currentPlayerWithBall.GetComponentInChildren<Animator>();
+        //AnimationManager.Instance.ShootAnim(animator);
 
-        #endregion
+        //#endregion
 
         Vector2Int tileIndex = GameManager.instance.GetPlayerGoalTile().GridPosition;
         GridTile targetTile = GridGenerator.instance.GetTile(tileIndex.x, tileIndex.y);

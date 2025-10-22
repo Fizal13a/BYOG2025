@@ -419,9 +419,13 @@ public partial class AIPlayerController : MonoBehaviour
             yield break;
 
         Debug.Log($"{currentAIWithBall.name} passing to {receiver.name}");
-        
-        Animator animator = currentAIWithBall.GetComponentInChildren<Animator>();
-        AnimationManager.Instance.PassAnim(animator);
+
+        //#region Play Animation
+
+        //Animator animator = currentAIWithBall.GetComponentInChildren<Animator>();
+        //AnimationManager.Instance.PassAnim(animator);
+
+        //#endregion
 
         GridTile targetTile = GridGenerator.instance.GetTile(
             receiver.GetGridPosition().x, 
@@ -448,9 +452,14 @@ public partial class AIPlayerController : MonoBehaviour
             yield break;
 
         Debug.Log($"{currentSelectedAI.name} tackling for the ball");
-        
-        Animator animator = currentSelectedAI.GetComponentInChildren<Animator>();
-        AnimationManager.Instance.TackleAnim(animator);
+
+
+        //#region Play Animation
+
+        //Animator animator = currentSelectedAI.GetComponentInChildren<Animator>();
+        //AnimationManager.Instance.TackleAnim(animator);
+
+        //#endregion
 
         SetPlayerWithBall(currentSelectedAI);
         PlayerController.instance.RemovePlayerWithBall();
@@ -470,9 +479,11 @@ public partial class AIPlayerController : MonoBehaviour
             yield break;
 
         Debug.Log($"{currentAIWithBall.name} shooting at goal!");
-        
-        Animator animator = currentAIWithBall.GetComponentInChildren<Animator>();
-        AnimationManager.Instance.ShootAnim(animator);
+
+        //#region Play Animation
+        //Animator animator = currentAIWithBall.GetComponentInChildren<Animator>();
+        //AnimationManager.Instance.ShootAnim(animator);
+        //#endregion
 
         GameObject ball = GameManager.instance.GetBallObject();
         Transform goalTileTrans = GameManager.instance.GetAIGoalTile().transform;

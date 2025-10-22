@@ -39,10 +39,6 @@ public partial class GameManager : MonoBehaviour
     private AIPlayer currentAIWithBall;
     private Vector2Int currentBallPosition;
 
-        [Header("Camera Info")]
-    [SerializeField] CinemachineCamera cine_camera;
-    [SerializeField] Vector3 initialPosition;
-
     private GridTile playerGoalTile;
     private GridTile aiGoalTile;
 
