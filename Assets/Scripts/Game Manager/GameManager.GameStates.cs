@@ -43,12 +43,15 @@ public partial class GameManager : MonoBehaviour
                 currentAITurnCoroutine = null;
             }
             
+            HandCardManager.instance.ClearCards();
+            HandCardManager.instance.DrawCards();
             playerController.SetUpTurn(true);
             aiPlayerController.SetUpTurn(false);
         }
         else
         {
             // AI Turn
+            HandCardManager.instance.ClearCards();
             playerController.SetUpTurn(false);
             aiPlayerController.SetUpTurn(true);
         }
