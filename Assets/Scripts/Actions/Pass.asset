@@ -16,3 +16,4 @@ MonoBehaviour:
   cardActionSprite: {fileID: 0}
   actionCost: 2
   actionName: Pass
+  actionType: 1
