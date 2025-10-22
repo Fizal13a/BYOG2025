@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GridTile : MonoBehaviour
 {
@@ -18,12 +19,14 @@ public class GridTile : MonoBehaviour
     [HideInInspector] public int hCost;
     public int FCost => gCost + hCost;
     [HideInInspector] public GridTile parent;
+    
+    private Image uiImage;
 
     private void Awake() => rend = GetComponent<Renderer>();
 
     public void Highlight(bool active)
     {
-        rend.material.color = active ? Color.yellow : Color.white;
+        SetColor(active ? Color.yellow : Color.white);
     }
 
     public void SetGridPosition(Vector2Int gridPosition)
@@ -39,5 +42,20 @@ public class GridTile : MonoBehaviour
     public bool IsOccupied()
     {
         return isOccupied;
+    }
+    
+    public void SetUIImage(Image image)
+    {
+        uiImage = image;
+    }
+    
+    // Easy access to change visuals
+    public void SetColor(Color color)
+    {
+        if (uiImage != null)
+        {
+            color.a = 0.3f;
+            uiImage.color = color;
+        }
     }
 }
