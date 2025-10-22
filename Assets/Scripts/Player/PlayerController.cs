@@ -91,7 +91,7 @@ public partial class PlayerController : MonoBehaviour
         }
 
         // --- Raycast to select the player ---
-        HandlePlayerSelection();
+        //HandlePlayerSelection();
     }
     
     private void HandlePlayerSelection()

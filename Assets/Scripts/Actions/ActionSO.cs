@@ -8,4 +8,6 @@ public class ActionSO : ScriptableObject
     public Sprite cardActionSprite;
     public int actionCost;
     public string actionName;
+    
+    public ActionData.Actions actionType;
 }

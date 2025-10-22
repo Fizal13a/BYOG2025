@@ -76,4 +76,9 @@ public class HandCardManager : MonoBehaviour
             Destroy(card.gameObject);
         }
     }
+
+    public void ToggleCardsHolder(bool toggle)
+    {
+        cardHolder.gameObject.SetActive(toggle);
+    }
 }

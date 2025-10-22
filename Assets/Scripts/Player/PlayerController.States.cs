@@ -2,8 +2,10 @@ using UnityEngine;
 
 public partial class PlayerController : MonoBehaviour
 {
-    private void HandleStates(ActionData.Actions state)
+    public void HandleStates(ActionData.Actions state, Player currPlayer)
     {
+        currentSelectedPlayer =  currPlayer;
+        
         currentAction = GetAction(state);
         GridGenerator.instance.ClearHighlightedTiles();
 

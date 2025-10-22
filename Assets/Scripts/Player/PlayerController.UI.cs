@@ -18,7 +18,7 @@ public partial class PlayerController : MonoBehaviour
 
     private void SetUpUI()
     {
-        InitializeButtonEvents();
+        //InitializeButtonEvents();
     }
 
     private void InitializeButtonEvents()
@@ -29,11 +29,11 @@ public partial class PlayerController : MonoBehaviour
         shootButton.onClick.RemoveAllListeners();
         dashButton.onClick.RemoveAllListeners();
 
-        moveButton.onClick.AddListener(() => HandleStates(availableActions[0].action));
-        passButton.onClick.AddListener(() => HandleStates(availableActions[1].action));
-        tackleButton.onClick.AddListener(() => HandleStates(availableActions[2].action));
-        shootButton.onClick.AddListener(() => HandleStates(availableActions[3].action));
-        dashButton.onClick.AddListener(() => HandleStates(availableActions[4].action));
+        //moveButton.onClick.AddListener(() => HandleStates(availableActions[0].action));
+        //passButton.onClick.AddListener(() => HandleStates(availableActions[1].action));
+        //tackleButton.onClick.AddListener(() => HandleStates(availableActions[2].action));
+        //shootButton.onClick.AddListener(() => HandleStates(availableActions[3].action));
+        //dashButton.onClick.AddListener(() => HandleStates(availableActions[4].action));
     }
 
     #endregion
