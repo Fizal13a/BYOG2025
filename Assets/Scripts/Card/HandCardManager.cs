@@ -15,7 +15,7 @@ public class HandCardManager : MonoBehaviour
     
     public ActionsListSO actionsList;
     
-    private List<CardObj> currentHandCards = new List<CardObj>();
+    private List<Card> currentHandCards = new List<Card>();
 
     private void Awake()
     {
@@ -69,7 +69,7 @@ public class HandCardManager : MonoBehaviour
     public void SpawnCard(ActionSO actionData)
     {
         GameObject newCard = Instantiate(cardPrefab, cardHolder);
-        CardObj card = newCard.GetComponent<CardObj>();
+        Card card = newCard.GetComponent<Card>();
         card.SetUpCard(actionData);
         currentHandCards.Add(card);
     }
@@ -95,7 +95,7 @@ public class HandCardManager : MonoBehaviour
 
         foreach (var card in currentHandCards)
         {
-            card.HandleCardState();
+            //card.HandleCardState();
         }
     }
 }
