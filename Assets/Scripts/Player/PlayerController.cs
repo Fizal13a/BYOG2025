@@ -25,6 +25,12 @@ public partial class PlayerController : MonoBehaviour
     public Player currentPassTargetPlayer;
 
     private bool isPlayerTurn = false;
+    
+    [Header("Conditions")]
+    public bool canMove = true;
+    public bool canPass = true;
+    public bool canTackle = true;
+    public bool canShoot =  true;
 
     #region Initialization
     
@@ -92,6 +98,31 @@ public partial class PlayerController : MonoBehaviour
 
         // --- Raycast to select the player ---
         //HandlePlayerSelection();
+    }
+
+    public void SetConditions()
+    {
+        canPass = true; canTackle = true;
+        canMove = true; canShoot = true;
+
+        Vector2Int playerGridPos = currentSelectedPlayer.GetGridPosition();
+
+        // Disable tackle button if player with ball exists nearby
+        if (currentPlayerWithBall != null || !IsBallAdjacent(playerGridPos))
+            canTackle = false;
+        
+        // Disable pass button if player with ball not exists
+        if (currentPlayerWithBall == null)
+            canPass =  false;
+        
+        else if(currentSelectedPlayer != currentPlayerWithBall)
+            canPass =  false;
+
+        // Disable shoot button if player doesn't have ball or near goal
+        if (currentPlayerWithBall == null || !IsNearGoal(playerGridPos))
+            canShoot =  false;
+        
+        Debug.Log($"{canPass} {canTackle} {canShoot}");
     }
     
     private void HandlePlayerSelection()

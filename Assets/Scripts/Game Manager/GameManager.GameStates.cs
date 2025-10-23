@@ -104,6 +104,13 @@ public partial class GameManager : MonoBehaviour
         {
             Debug.Log($"{activeTeam.TeamName} out of action points!");
             EndTurn();
+            return;
+        }
+        
+        if (IsPlayerTurn())
+        {
+            HandCardManager.instance.CheckCards();
+            //playerController.SetConditions();
         }
     }
     

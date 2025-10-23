@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -13,6 +14,8 @@ public class HandCardManager : MonoBehaviour
     public GameObject cardPrefab;
     
     public ActionsListSO actionsList;
+    
+    private List<CardObj> currentHandCards = new List<CardObj>();
 
     private void Awake()
     {
@@ -34,6 +37,7 @@ public class HandCardManager : MonoBehaviour
 
     IEnumerator DrawCardsRoutine()
     {
+        currentHandCards.Clear();
         currentActionPointsInHand = 0;
 
         while (currentActionPointsInHand < maxActionPointsInHand)
@@ -49,7 +53,7 @@ public class HandCardManager : MonoBehaviour
             else if(currentActionPointsInHand != maxActionPointsInHand)
             {
                 DrawCards();
-                continue;
+                yield break;
             }
             else
             {
@@ -58,13 +62,16 @@ public class HandCardManager : MonoBehaviour
             
             yield return null;
         }
+
+        CheckCards();
     }
 
     public void SpawnCard(ActionSO actionData)
     {
         GameObject newCard = Instantiate(cardPrefab, cardHolder);
-        Card card = newCard.GetComponent<Card>();
+        CardObj card = newCard.GetComponent<CardObj>();
         card.SetUpCard(actionData);
+        currentHandCards.Add(card);
     }
 
     public void ClearCards()
@@ -80,5 +87,15 @@ public class HandCardManager : MonoBehaviour
     public void ToggleCardsHolder(bool toggle)
     {
         cardHolder.gameObject.SetActive(toggle);
+    }
+
+    public void CheckCards()
+    {
+        PlayerController.instance.SetConditions();
+
+        foreach (var card in currentHandCards)
+        {
+            card.HandleCardState();
+        }
     }
 }
