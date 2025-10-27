@@ -192,8 +192,7 @@ public partial class AIPlayerController : MonoBehaviour
             return;
 
         GridTile aiTile = GridGenerator.instance.GetTile(
-            currentAIWithBall.GetGridPosition().x, 
-            currentAIWithBall.GetGridPosition().y);
+            currentAIWithBall.GetGridPosition());
         
         int distToGoal = ManhattanDistance(aiTile.GridPosition, goalTile.GridPosition);
 
@@ -230,18 +229,18 @@ public partial class AIPlayerController : MonoBehaviour
         }
         else
         {
-            GridTile targetTile = GridGenerator.instance.GetTile(
-                passTarget.GetGridPosition().x, 
-                passTarget.GetGridPosition().y);
-            
-            int targetDistToGoal = ManhattanDistance(targetTile.GridPosition, goalTile.GridPosition);
-            int currentDistToGoal = ManhattanDistance(currentAIWithBall.GetGridPosition(), goalTile.GridPosition);
-
-            if (targetDistToGoal < currentDistToGoal)
-            {
-                score = 300;
-                Debug.Log($"AI Pass Option: Target closer to goal. Score: {score}");
-            }
+            // GridTile targetTile = GridGenerator.instance.GetTile(
+            //     passTarget.GetGridPosition().x, 
+            //     passTarget.GetGridPosition().y);
+            //
+            // int targetDistToGoal = ManhattanDistance(targetTile.GridPosition, goalTile.GridPosition);
+            // int currentDistToGoal = ManhattanDistance(currentAIWithBall.GetGridPosition(), goalTile.GridPosition);
+            //
+            // if (targetDistToGoal < currentDistToGoal)
+            // {
+            //     score = 300;
+            //     Debug.Log($"AI Pass Option: Target closer to goal. Score: {score}");
+            // }
         }
 
         if (score > 0)
@@ -265,8 +264,7 @@ public partial class AIPlayerController : MonoBehaviour
         if (hasBall && currentAIWithBall != null)
         {
             GridTile aiTile = GridGenerator.instance.GetTile(
-                currentAIWithBall.GetGridPosition().x, 
-                currentAIWithBall.GetGridPosition().y);
+                currentAIWithBall.GetGridPosition());
             
             int distToGoal = ManhattanDistance(aiTile.GridPosition, goalTile.GridPosition);
 
@@ -312,7 +310,7 @@ public partial class AIPlayerController : MonoBehaviour
             return;
 
         Vector2Int ballPos = GameManager.instance.GetCurrentBallPosition();
-        GridTile ballTile = GridGenerator.instance.GetTile(ballPos.x, ballPos.y);
+        GridTile ballTile = GridGenerator.instance.GetTile(ballPos);
 
         AIPlayer tackler = GetAIAdjacentToBall(ballTile);
 
@@ -375,8 +373,7 @@ public partial class AIPlayerController : MonoBehaviour
         if (hasBall && currentAIWithBall != null)
         {
             GridTile currentTile = GridGenerator.instance.GetTile(
-                currentAIWithBall.GetGridPosition().x, 
-                currentAIWithBall.GetGridPosition().y);
+                currentAIWithBall.GetGridPosition());
             
             GridTile nextTile = GetNextTileToward(currentTile, goalTile);
 
@@ -390,11 +387,10 @@ public partial class AIPlayerController : MonoBehaviour
         else if (currentSelectedAI != null)
         {
             Vector2Int ballPos = GameManager.instance.GetCurrentBallPosition();
-            GridTile ballTile = GridGenerator.instance.GetTile(ballPos.x, ballPos.y);
+            GridTile ballTile = GridGenerator.instance.GetTile(ballPos);
             
             GridTile currentTile = GridGenerator.instance.GetTile(
-                currentSelectedAI.GetGridPosition().x, 
-                currentSelectedAI.GetGridPosition().y);
+                currentSelectedAI.GetGridPosition());
             
             GridTile nextTile = GetNextTileToward(currentTile, ballTile);
 
@@ -428,8 +424,7 @@ public partial class AIPlayerController : MonoBehaviour
         //#endregion
 
         GridTile targetTile = GridGenerator.instance.GetTile(
-            receiver.GetGridPosition().x, 
-            receiver.GetGridPosition().y);
+            receiver.GetGridPosition());
 
         currentPassTargetAI = receiver;
         yield return StartCoroutine(MoveBallInArc(
@@ -569,7 +564,7 @@ public partial class AIPlayerController : MonoBehaviour
         foreach (var dir in directions)
         {
             Vector2Int checkPos = currentAIWithBall.GetGridPosition() + dir;
-            GridTile tile = GridGenerator.instance.GetTile(checkPos.x, checkPos.y);
+            GridTile tile = GridGenerator.instance.GetTile(checkPos);
             
             if (tile != null && tile.IsOccupied())
             {
@@ -589,7 +584,7 @@ public partial class AIPlayerController : MonoBehaviour
         foreach (var dir in directions)
         {
             Vector2Int checkPos = ai.GetGridPosition() + dir;
-            GridTile tile = GridGenerator.instance.GetTile(checkPos.x, checkPos.y);
+            GridTile tile = GridGenerator.instance.GetTile(checkPos);
             
             if (tile != null && tile.IsOccupied())
             {
@@ -655,28 +650,28 @@ public partial class AIPlayerController : MonoBehaviour
         int moveY = dir.y != 0 ? (dir.y > 0 ? 1 : -1) : 0;
 
         // Try diagonal
-        if (moveX != 0 && moveY != 0)
-        {
-            GridTile diag = GridGenerator.instance.GetTile(from.GridPosition.x + moveX, from.GridPosition.y + moveY);
-            if (diag != null && !diag.IsOccupied())
-                return diag;
-        }
-
-        // Try horizontal
-        if (moveX != 0)
-        {
-            GridTile horiz = GridGenerator.instance.GetTile(from.GridPosition.x + moveX, from.GridPosition.y);
-            if (horiz != null && !horiz.IsOccupied())
-                return horiz;
-        }
-
-        // Try vertical
-        if (moveY != 0)
-        {
-            GridTile vert = GridGenerator.instance.GetTile(from.GridPosition.x, from.GridPosition.y + moveY);
-            if (vert != null && !vert.IsOccupied())
-                return vert;
-        }
+        // if (moveX != 0 && moveY != 0)
+        // {
+        //     GridTile diag = GridGenerator.instance.GetTile(from.GridPosition.x + moveX, from.GridPosition.y + moveY);
+        //     if (diag != null && !diag.IsOccupied())
+        //         return diag;
+        // }
+        //
+        // // Try horizontal
+        // if (moveX != 0)
+        // {
+        //     GridTile horiz = GridGenerator.instance.GetTile(from.GridPosition.x + moveX, from.GridPosition.y);
+        //     if (horiz != null && !horiz.IsOccupied())
+        //         return horiz;
+        // }
+        //
+        // // Try vertical
+        // if (moveY != 0)
+        // {
+        //     GridTile vert = GridGenerator.instance.GetTile(from.GridPosition.x, from.GridPosition.y + moveY);
+        //     if (vert != null && !vert.IsOccupied())
+        //         return vert;
+        // }
 
         return null;
     }

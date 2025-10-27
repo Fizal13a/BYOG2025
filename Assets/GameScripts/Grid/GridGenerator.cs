@@ -8,7 +8,8 @@ public class GridGenerator : MonoBehaviour
     public static GridGenerator instance;
 
     [Header("Grid Settings")] public Transform gridParent;
-    public GameSettings gameSettings;
+    public GridSettings gridSettings;
+    public MatchSettings matchSettings;
 
     // 2D array to store generated tiles
     private GameObject[,] grid;
@@ -31,7 +32,7 @@ public class GridGenerator : MonoBehaviour
 
     public void GenerateGrid()
     {
-        if (gameSettings.tilePrefab == null)
+        if (gridSettings.gridTilePrefab == null)
         {
             Debug.LogWarning("No tile prefab assigned!");
             return;
@@ -39,11 +40,11 @@ public class GridGenerator : MonoBehaviour
 
         ClearGrid();
 
-        int width = gameSettings.gridWidth;
-        int height = gameSettings.gridHeight;
-        float spacing = gameSettings.spacing;
-        GameObject tilePrefab = gameSettings.tilePrefab;
-        GameObject goalPost = gameSettings.goalPost;
+        int width = gridSettings.gridWidth;
+        int height = gridSettings.gridHeight;
+        float spacing = gridSettings.spacing;
+        GameObject tilePrefab = gridSettings.gridTilePrefab;
+        GameObject goalPost = gridSettings.goalPostPrefab;
 
         // Create ONE shared canvas for all tiles
         Canvas sharedCanvas = CreateSharedCanvas(width, height, spacing);
@@ -72,21 +73,21 @@ public class GridGenerator : MonoBehaviour
                 Image uiImage = CreateUIImageForTile(sharedCanvas, x, y, spacing);
                 tileScript.SetUIImage(uiImage); // Direct reference as you wanted!
 
-                if (GameManager.instance.aiTeamGoalPos == new Vector2Int(x, y))
+                if (matchSettings.opponentGoalPosition == new Vector2Int(x, y))
                 {
                     position.y = 0.4f;
                     GameObject goal = Instantiate(goalPost, position, Quaternion.identity, transform);
                     goal.transform.SetParent(tile.transform);
-                    GameManager.instance.SetAIGoalTile(tileScript);
+                    //GameManager.instance.SetAIGoalTile(tileScript);
                 }
 
-                if (GameManager.instance.playerTeamGoalPos == new Vector2Int(x, y))
+                if (matchSettings.teamGoalPosition == new Vector2Int(x, y))
                 {
                     position.y = 0.4f;
                     GameObject goal = Instantiate(goalPost, position, Quaternion.identity, transform);
                     goal.transform.rotation = Quaternion.Euler(0, 180, 0);
                     goal.transform.SetParent(tile.transform);
-                    GameManager.instance.SetPlayerGoalTile(tileScript);
+                    //GameManager.instance.SetPlayerGoalTile(tileScript);
                 }
 
                 grid[x, y] = tile;
@@ -129,8 +130,8 @@ public class GridGenerator : MonoBehaviour
 
         // Position manually to match 3D grid position
         // Since canvas is centered, calculate offset from center
-        int width = gameSettings.gridWidth;
-        int height = gameSettings.gridHeight;
+        int width = gridSettings.gridWidth;
+        int height = gridSettings.gridHeight;
 
         float offsetX = (x - (width - 1) / 2f) * spacing * 100;
         float offsetY = (y - (height - 1) / 2f) * spacing * 100;
@@ -143,56 +144,20 @@ public class GridGenerator : MonoBehaviour
         return image;
     }
 
-    [ContextMenu("Generate Grid")]
-    // --- Context menu use only --- 
-    public void DebugGridCreation()
-    {
-        if (gameSettings.tilePrefab == null)
-        {
-            Debug.LogWarning("No tile prefab assigned!");
-            return;
-        }
-
-        ClearGrid();
-
-        int width = gameSettings.gridWidth;
-        int height = gameSettings.gridHeight;
-        float spacing = gameSettings.spacing;
-        GameObject tilePrefab = gameSettings.tilePrefab;
-        GameObject goalPost = gameSettings.goalPost;
-
-        grid = new GameObject[width, height];
-        gridTiles = new GridTile[width, height];
-
-        for (int x = 0; x < width; x++)
-        {
-            for (int y = 0; y < height; y++)
-            {
-                Vector3 position = new Vector3(x * spacing, 0f, y * spacing);
-                GameObject tile = Instantiate(tilePrefab, position, Quaternion.identity, transform);
-                tile.name = $"Tile_{x}_{y}";
-                tile.transform.SetParent(gridParent);
-
-                // Store in array
-                grid[x, y] = tile;
-            }
-        }
-    }
-
     #endregion
 
     #region Getters
 
     public GameObject GetTileObject(int x, int y)
     {
-        if (x < 0 || x >= gameSettings.gridWidth || y < 0 || y >= gameSettings.gridHeight) return null;
+        if (x < 0 || x >= gridSettings.gridWidth || y < 0 || y >= gridSettings.gridHeight) return null;
         return grid[x, y];
     }
 
-    public GridTile GetTile(int x, int y)
+    public GridTile GetTile(Vector2Int  position)
     {
-        if (x < 0 || x >= gameSettings.gridWidth || y < 0 || y >= gameSettings.gridHeight) return null;
-        return gridTiles[x, y];
+        if (position.x < 0 || position.x >= gridSettings.gridWidth || position.y < 0 || position.y >= gridSettings.gridHeight) return null;
+        return gridTiles[position.x, position.y];
     }
 
     #endregion
@@ -246,7 +211,7 @@ public class GridGenerator : MonoBehaviour
         foreach (var dir in directions)
         {
             Vector2Int checkPos = playerGridPos + dir;
-            GridTile tile = GetTile(checkPos.x, checkPos.y);
+            GridTile tile = GetTile(checkPos);
             if (tile != null && !tile.IsOccupied())
             {
                 tile.Highlight(true);
@@ -255,9 +220,9 @@ public class GridGenerator : MonoBehaviour
         }
     }
 
-    public void HighlightPassTiles(int x, int y)
+    public void HighlightPassTiles(Vector2Int position)
     {
-        GridTile tile = GetTile(x, y);
+        GridTile tile = GetTile(position);
         if (tile != null && tile.IsWalkable)
         {
             tile.Highlight(true);

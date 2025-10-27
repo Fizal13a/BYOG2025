@@ -1,0 +1,351 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using Random = UnityEngine.Random;
+
+public class TeamManager : MonoBehaviour
+{
+    public MatchSettings matchSettings;
+
+    [Header("Team")] private Team team;
+
+    [Header("Players")] public GameObject playerPrefab;
+    public GameObject opponentPrefab;
+    private List<Player> players = new List<Player>();
+
+    [Header("Match")] private bool isCurrectTurn = false;
+    private Player currentSelectedPlayer;
+    private Player currentPlayerWithBall;
+    private Player currentPassTarget;
+
+    [Header("Actions")] public List<ActionData> availableActions = new List<ActionData>();
+    private ActionData currentAction;
+
+    [Header("Condition bool")] private bool canSelect = false;
+    private bool canPass = false;
+    private bool canMove = false;
+    private bool canTackle = false;
+    private bool canShoot = false;
+
+    #region Initialization
+
+    public void InitializeTeam(Team team)
+    {
+        this.team = team;
+
+        SpawnPlayers();
+    }
+
+    private void SpawnPlayers()
+    {
+        players.Clear();
+
+        for (int i = 0; i < matchSettings.maxTeamPlayers; i++)
+        {
+            Vector3 pos;
+            if (team.teamType == Team.TeamType.Player)
+            {
+                GameObject player = Instantiate(playerPrefab, transform);
+                pos = new Vector3(matchSettings.teamPositions[i].x, 0, matchSettings.teamPositions[i].y);
+                player.name = "Player" + i;
+                player.transform.position = pos;
+                Player playerScript = player.GetComponent<Player>();
+                if (playerScript != null) players.Add(playerScript);
+            }
+            else
+            {
+                GameObject opponent = Instantiate(opponentPrefab, transform);
+                pos = new Vector3(matchSettings.opponentPositions[i].x, 0, matchSettings.opponentPositions[i].y);
+                opponent.name = "Opponent" + i;
+                opponent.transform.position = pos;
+                Player playerScript = opponent.GetComponent<Player>();
+                if (playerScript != null) players.Add(playerScript);
+            }
+        }
+    }
+
+    #endregion
+
+    #region Setter
+
+    public void SetUpTurn(bool turn)
+    {
+        isCurrectTurn = turn;
+    }
+
+    public void SetPlayerWithBall(Player player)
+    {
+        GameObject ball = MatchManager.instance.GetBallObject();
+        DebugLogger.Log(ball.gameObject.name + ", " + player.gameObject.name, "yellow");
+        ball.transform.SetParent(player.ballHolderPosition);
+        ball.transform.localPosition = Vector3.zero;
+        currentPlayerWithBall = player;
+
+        currentPassTarget = null;
+    }
+
+    public void RemovePlayerWithBall()
+    {
+        currentPlayerWithBall = null;
+    }
+
+    public void SetConditions()
+    {
+        canPass = canMove = canShoot = canTackle = true;
+
+        Vector2Int playerGridPos = currentSelectedPlayer.GetGridPosition();
+
+        // Disable tackle if player with ball exists nearby
+        if (currentPlayerWithBall != null || !IsBallAdjacent(playerGridPos)) canTackle = false;
+
+        // Disable pass if player with ball not exists
+        if (currentPlayerWithBall == null)
+            canPass = false;
+
+        else if (currentSelectedPlayer != currentPlayerWithBall) canPass = false;
+
+        // Disable shoot if player doesn't have ball or near goal
+        if (currentPlayerWithBall == null || !IsNearGoal(playerGridPos)) canShoot = false;
+
+        Debug.Log($"{canPass} {canTackle} {canShoot}");
+    }
+
+    private bool IsBallAdjacent(Vector2Int playerGridPos)
+    {
+        Vector2Int[] directions =
+        {
+            new(1, 0), new(-1, 0), new(0, 1), new(0, -1), new(1, 1), new(-1, 1), new(1, -1), new(-1, -1)
+        };
+
+        foreach (var dir in directions)
+        {
+            Vector2Int pos = new Vector2Int(playerGridPos.x + dir.x, playerGridPos.y + dir.y);
+            GridTile tile = GridGenerator.instance.GetTile(pos);
+            if (tile == null) continue;
+
+            if (tile.GridPosition == MatchManager.instance.GetCurrentBallPosition()) return true;
+        }
+
+        return false;
+    }
+
+    private bool IsNearGoal(Vector2Int playerGridPos)
+    {
+        Vector2Int[] directions =
+        {
+            new(1, 0), new(-1, 0), new(0, 1), new(0, -1), new(1, 1), new(-1, 1), new(1, -1), new(-1, -1), new(2, 0),
+            new(-2, 0), new(0, 2), new(0, -2), new(2, 2), new(-2, 2), new(2, -2), new(-2, -2)
+        };
+
+        Vector2Int goalPos = GridGenerator.instance.matchSettings.teamGoalPosition;
+
+        foreach (var dir in directions)
+        {
+            Vector2Int pos = new Vector2Int(playerGridPos.x + dir.x, playerGridPos.y + dir.y);
+            GridTile tile = GridGenerator.instance.GetTile(pos);
+            if (tile == null) continue;
+
+            if (tile.GridPosition == goalPos) return true;
+        }
+
+        return false;
+    }
+
+    #endregion
+
+    #region Actions Handling
+
+    public void HandleStates(ActionData.Actions state, Player currPlayer)
+    {
+        currentSelectedPlayer = currPlayer;
+        currentAction = GetAction(state);
+        // Clear all highlighted tiles
+        GridGenerator.instance.ClearHighlightedTiles();
+        // Checks for action points
+        if (!GameManager.instance.CheckActionPoints(currentAction.actionCost)) return;
+        // Actions state handling
+        switch (state)
+        {
+            case ActionData.Actions.Move:
+                DebugLogger.Log("Player On Move State", "yellow");
+                GridGenerator.instance.HighlightMoveTiles(currentSelectedPlayer);
+                canSelect = true;
+                break;
+
+            case ActionData.Actions.Pass:
+                foreach (var player in players)
+                {
+                    if (player == currentPlayerWithBall) continue;
+
+                    Vector2Int positionIndex = player.GetGridPosition();
+                    GridGenerator.instance.HighlightPassTiles(positionIndex);
+                }
+
+                DebugLogger.Log("Player On Pass State", "yellow");
+                canSelect = true;
+                break;
+
+            case ActionData.Actions.Tackle:
+                //Tackle();
+                DebugLogger.Log("Player On Tackle State", "yellow");
+                break;
+
+            case ActionData.Actions.Shoot:
+                //ShootToGoal();
+                DebugLogger.Log("Player On Shoot State", "yellow");
+                break;
+
+            case ActionData.Actions.Dash:
+                DebugLogger.Log("Player On Dash State", "yellow");
+                break;
+        }
+    }
+
+    private ActionData GetAction(ActionData.Actions action)
+    {
+        foreach (var act in availableActions)
+        {
+            if (act.action == action)
+            {
+                return act;
+            }
+        }
+
+        return null;
+    }
+
+    #endregion
+
+    #region Action Execution
+
+    // --- Move to the selected Tile ---
+    #region Movement
+
+    private void MoveToTile(GridTile targetTile)
+    {
+        StartCoroutine(MoveToTileRoutine(targetTile));
+    }
+
+    private IEnumerator MoveToTileRoutine(GridTile targetTile)
+    {
+        // Update tile occupancy
+        GridTile currentTile = GridGenerator.instance.GetTile(currentSelectedPlayer.GetGridPosition());
+        currentTile.SetOccupied(false);
+        targetTile.SetOccupied(true);
+
+        // Move player to target position
+        Vector3 start = currentSelectedPlayer.transform.position;
+        Vector3 end = new Vector3(targetTile.WorldPosition.x, start.y, targetTile.WorldPosition.z);
+    
+        float moveSpeed = currentSelectedPlayer.GetMoveSpeed();
+        float t = 0f;
+
+        while (t < 1f)
+        {
+            t += Time.deltaTime * moveSpeed;
+            currentSelectedPlayer.transform.position = Vector3.Lerp(start, end, t);
+            yield return null;
+        }
+
+        // Ensure final position is exact
+        currentSelectedPlayer.transform.position = end;
+        currentSelectedPlayer.SetGridPosition(targetTile.GridPosition);
+
+        // Handle ball pickup
+        if (targetTile.GridPosition == MatchManager.instance.GetCurrentBallPosition())
+        {
+            SetPlayerWithBall(currentSelectedPlayer);
+        }
+
+        // Update ball position if this player has it
+        if (currentPlayerWithBall == currentSelectedPlayer)
+        {
+            MatchManager.instance.SetBallPosition(targetTile.GridPosition);
+        }
+
+        //GameManager.instance.CheckEndTurn();
+        currentSelectedPlayer = null;
+    }
+
+    #endregion
+
+    // --- Once the target player is selected, pass the ball to that player ---
+    #region Pass
+
+    private void PassToPlayer(GridTile tile)
+    {
+        foreach (var player in players)
+        {
+            if (player.GetGridPosition() == tile.GridPosition)
+            {
+                currentPassTarget = player;
+                currentPlayerWithBall = player;
+                break;
+            }
+        }
+
+        GameObject ball = MatchManager.instance.GetBallObject();
+        ball.transform.SetParent(null);
+
+        StartCoroutine(BallPass(currentPassTarget.ballHolderPosition));
+        MatchManager.instance.SetBallPosition(currentPlayerWithBall.GetGridPosition());
+        currentSelectedPlayer = null;
+    }
+
+    private IEnumerator BallPass(Transform targetTile)
+    {
+        if (targetTile == null) yield break;
+
+        yield return StartCoroutine(BallController.instance.MoveBall(targetTile));
+        
+        SetPlayerWithBall(currentPlayerWithBall);
+        //GameManager.instance.CheckEndTurn();
+    }
+
+    #endregion
+
+    // --- Once the AI with ball is in the adjustment tile, Can get the ball back ---
+    #region Tackle
+
+    private void Tackle()
+    {
+        Vector2Int playerGridPos = currentSelectedPlayer.GetGridPosition();
+        MatchManager.instance.SetBallPosition(playerGridPos);
+        SetPlayerWithBall(currentSelectedPlayer);
+        //AIPlayerController.instance.RemoveBall();
+
+        //GameManager.instance.CheckEndTurn();
+    }
+
+    #endregion
+
+    // --- Shoot the ball to goal ---
+    #region Shoot
+
+    private void ShootToGoal()
+    {
+        Vector2Int tileIndex = GridGenerator.instance.matchSettings.teamGoalPosition;
+        GridTile targetTile = GridGenerator.instance.GetTile(tileIndex);
+
+        Transform targetPos = targetTile.transform;
+
+        StartCoroutine(BallShootToGoal(targetPos));
+
+        currentSelectedPlayer = null;
+    }
+
+    IEnumerator BallShootToGoal(Transform targetTile)
+    {
+        if (targetTile == null) yield break;
+
+        yield return StartCoroutine(BallController.instance.BallShoot(targetTile));
+        
+        //UIManager.instance.AddPlayerScore(1);
+        //GameManager.instance.ResetRound();
+    }
+
+    #endregion
+
+    #endregion
+}

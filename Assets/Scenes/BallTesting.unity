@@ -1455,58 +1455,6 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
---- !u!1 &783325681
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 783325682}
-  - component: {fileID: 783325683}
-  m_Layer: 0
-  m_Name: AIs
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &783325682
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 783325681}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1461779256}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &783325683
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 783325681}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 97dd6830b4c433c438b1b67c9f62cb82, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AIPlayerController
-  availableActions: []
-  playerLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  currentAIWithBall: {fileID: 0}
-  currentSelectedAI: {fileID: 0}
-  currentPassTargetAI: {fileID: 0}
-  goalTile: {fileID: 0}
 --- !u!1 &893772079
 GameObject:
   m_ObjectHideFlags: 0
@@ -2254,7 +2202,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1297538396
 Transform:
   m_ObjectHideFlags: 0
@@ -2684,7 +2632,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1458959538
 Transform:
   m_ObjectHideFlags: 0
@@ -2741,9 +2689,7 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1712556748}
-  - {fileID: 783325682}
+  m_Children: []
   m_Father: {fileID: 756562073}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1461779257
@@ -2755,34 +2701,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1461779255}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d74acc9eccc36c440b1fb2ea26f3db1e, type: 3}
+  m_Script: {fileID: 11500000, guid: 929bb39885e01064aa2be4e93258e7a1, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  gameSettings: {fileID: 11400000, guid: b6e23d5285aa60f419979ab8bf2f2548, type: 2}
-  playerPrefab: {fileID: 4049241680583303311, guid: 6b68271d230f92e47bf5d59cfddaca01, type: 3}
-  aiPrefab: {fileID: 5490615525532771975, guid: c6c7785be91e2bb488b894644d42402a, type: 3}
-  ballPrefab: {fileID: 6843622914399733620, guid: 5ab2eaa897feeab4cbf4bf847a8fbdcb, type: 3}
-  playersParent: {fileID: 1712556748}
-  aisParent: {fileID: 783325682}
-  playerSpawnTiles:
-  - {x: 1, y: 1}
-  - {x: 5, y: 1}
-  - {x: 3, y: 2}
-  aiSpawnTiles:
-  - {x: 1, y: 7}
-  - {x: 5, y: 7}
-  - {x: 3, y: 6}
-  ballSpawnTile: {x: 1, y: 2}
-  aiTeamGoalPos: {x: 3, y: 0}
-  playerTeamGoalPos: {x: 3, y: 8}
-  playerController: {fileID: 1712556749}
-  aiPlayerController: {fileID: 783325683}
-  turnDisplayText: {fileID: 180184932}
-  turnTimerText: {fileID: 665415128}
-  actionPointsText: {fileID: 0}
-  currentState: 1
-  baseActionPoints: 3
-  maxCarryOverPoints: 10
+  m_EditorClassIdentifier: Assembly-CSharp::MatchManager
+  teamPrefab: {fileID: 6802688715420847592, guid: e9673ade79ea3c041bfd95b4141abcfb, type: 3}
 --- !u!1 &1592327528
 GameObject:
   m_ObjectHideFlags: 0
@@ -2878,7 +2800,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1596997636
 Transform:
   m_ObjectHideFlags: 0
@@ -2957,66 +2879,6 @@ Transform:
   - {fileID: 754699771}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1712556747
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1712556748}
-  - component: {fileID: 1712556749}
-  m_Layer: 0
-  m_Name: Players
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1712556748
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1712556747}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1461779256}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1712556749
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1712556747}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5aa70f7679831ff47b090abdfb5c1671, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerController
-  availableActions: []
-  mainCamera: {fileID: 114469410}
-  playerLayer:
-    serializedVersion: 2
-    m_Bits: 8
-  tileLayer:
-    serializedVersion: 2
-    m_Bits: 128
-  currentPlayerWithBall: {fileID: 0}
-  currentPassTargetPlayer: {fileID: 0}
-  playerUIPanel: {fileID: 985504920}
-  moveButton: {fileID: 1266196142}
-  passButton: {fileID: 1147200444}
-  tackleButton: {fileID: 411447931}
-  shootButton: {fileID: 1403113664}
-  dashButton: {fileID: 2125131290}
 --- !u!1 &1771964727
 GameObject:
   m_ObjectHideFlags: 0

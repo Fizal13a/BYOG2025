@@ -87,11 +87,11 @@ public partial class PlayerController : MonoBehaviour
 
         foreach (var dir in directions)
         {
-            GridTile tile = GridGenerator.instance.GetTile(playerGridPos.x + dir.x, playerGridPos.y + dir.y);
-            if (tile == null) continue;
+            //GridTile tile = GridGenerator.instance.GetTile(playerGridPos.x + dir.x, playerGridPos.y + dir.y);
+            //if (tile == null) continue;
 
-            if (tile.GridPosition == GameManager.instance.GetCurrentBallPosition())
-                return true;
+            //if (tile.GridPosition == GameManager.instance.GetCurrentBallPosition())
+                //return true;
         }
 
         return false;
@@ -111,11 +111,11 @@ public partial class PlayerController : MonoBehaviour
 
         foreach (var dir in directions)
         {
-            GridTile tile = GridGenerator.instance.GetTile(playerGridPos.x + dir.x, playerGridPos.y + dir.y);
-            if (tile == null) continue;
+            //GridTile tile = GridGenerator.instance.GetTile(playerGridPos.x + dir.x, playerGridPos.y + dir.y);
+            //if (tile == null) continue;
 
-            if (tile.GridPosition == goalPos)
-                return true;
+            //if (tile.GridPosition == goalPos)
+                //return true;
         }
 
         return false;

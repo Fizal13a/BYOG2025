@@ -6,7 +6,7 @@ public partial class AIPlayerController : MonoBehaviour
 {
     private void MoveToTile(AIPlayer currentplayer, GridTile tile)
     {
-        GridTile currentTile = GridGenerator.instance.GetTile(currentplayer.GetGridPosition().x, currentplayer.GetGridPosition().y);
+        GridTile currentTile = GridGenerator.instance.GetTile(currentplayer.GetGridPosition());
         if (currentTile != null)
         {
             currentTile.SetOccupied(false);

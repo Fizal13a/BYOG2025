@@ -87,7 +87,7 @@ public partial class GameManager : MonoBehaviour
                 playerController.AddPlayer(player,gridPos,i);
             }
             
-            GridTile tileScript = GridGenerator.instance.GetTile(gridPos.x, gridPos.y);
+            GridTile tileScript = GridGenerator.instance.GetTile(gridPos);
             tileScript.SetOccupied(true);
         }
 
@@ -107,7 +107,7 @@ public partial class GameManager : MonoBehaviour
                 aiPlayerController.AddAI(ai, gridPos, i);
             }
             
-            GridTile tileScript = GridGenerator.instance.GetTile(gridPos.x, gridPos.y);
+            GridTile tileScript = GridGenerator.instance.GetTile(gridPos);
             tileScript.SetOccupied(true);
         }
 
@@ -241,13 +241,13 @@ public partial class GameManager : MonoBehaviour
             players[i].transform.position = new Vector3(playerSpawnTiles[i].x, yPos, playerSpawnTiles[i].y);
             Player pl = players[i].GetComponent<Player>();
             pl.SetGridPosition(playerSpawnTiles[i]);
-            GridTile playerTile = GridGenerator.instance.GetTile(playerSpawnTiles[i].x, playerSpawnTiles[i].y);
+            GridTile playerTile = GridGenerator.instance.GetTile(playerSpawnTiles[i]);
             playerTile.SetOccupied(true);
             
             aiPlayers[i].transform.position = new Vector3(aiSpawnTiles[i].x, yPos, aiSpawnTiles[i].y);
             AIPlayer aiP = aiPlayers[i].GetComponent<AIPlayer>();
             aiP.SetGridPosition(aiSpawnTiles[i]);
-            GridTile aiTile = GridGenerator.instance.GetTile(aiSpawnTiles[i].x, aiSpawnTiles[i].y);
+            GridTile aiTile = GridGenerator.instance.GetTile(aiSpawnTiles[i]);
             aiTile.SetOccupied(true);
         }
 

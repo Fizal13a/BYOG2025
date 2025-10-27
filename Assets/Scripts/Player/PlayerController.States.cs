@@ -26,7 +26,7 @@ public partial class PlayerController : MonoBehaviour
                         continue;
 
                     Vector2Int positionIndex = player.GetGridPosition();
-                    GridGenerator.instance.HighlightPassTiles(positionIndex.x, positionIndex.y);
+                    GridGenerator.instance.HighlightPassTiles(positionIndex);
                 }
                 DebugLogger.Log("Player On Pass State", "yellow");
                 canSelect = true;

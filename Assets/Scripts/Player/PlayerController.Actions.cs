@@ -25,7 +25,7 @@ public partial class PlayerController : MonoBehaviour
     
     private IEnumerator MoveToTileRoutine(GridTile targetTile)
     {
-        GridTile currentTile = GridGenerator.instance.GetTile(currentSelectedPlayer.GetGridPosition().x, currentSelectedPlayer.GetGridPosition().y);
+        GridTile currentTile = GridGenerator.instance.GetTile(currentSelectedPlayer.GetGridPosition());
         currentTile.SetOccupied(false);
         targetTile.SetOccupied(true);
         
@@ -192,7 +192,7 @@ public partial class PlayerController : MonoBehaviour
         //#endregion
 
         Vector2Int tileIndex = GameManager.instance.GetPlayerGoalTile().GridPosition;
-        GridTile targetTile = GridGenerator.instance.GetTile(tileIndex.x, tileIndex.y);
+        GridTile targetTile = GridGenerator.instance.GetTile(tileIndex);
 
         Transform targetPos = targetTile.transform;
 
