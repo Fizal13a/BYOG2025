@@ -7,6 +7,7 @@ public class MatchEvents
 
     public enum MatchEventType
     {
+        OnTurnStart,
         OnTeamScored,
         OnRoundReset
     }

@@ -37,6 +37,11 @@ public class Card : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHand
         actionCost.text = actionData.actionCost.ToString();
     }
 
+    public void HandleStates()
+    {
+        
+    }
+
     public void OnBeginDrag(PointerEventData eventData)
     {
         // Save position and parent so we can restore later

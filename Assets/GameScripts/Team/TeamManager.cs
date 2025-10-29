@@ -7,12 +7,10 @@ using Random = UnityEngine.Random;
 public class TeamManager : MonoBehaviour
 {
     public MatchSettings matchSettings;
-    
-    [Header("Events")]
-    public static TeamEvents events;
 
-    [Header("Team")] 
-    private Team team;
+    [Header("Events")] public static TeamEvents events;
+
+    [Header("Team")] private Team team;
 
     [Header("Players")] public GameObject playerPrefab;
     public GameObject opponentPrefab;
@@ -37,15 +35,18 @@ public class TeamManager : MonoBehaviour
     private void Awake()
     {
         events = new TeamEvents();
-        
-        events.AddEvent(TeamEvents.TeamEventType.CheckConditions, SetConditions);
-        events.AddEvent(TeamEvents.TeamEventType.ResetPosition, ResetPositions);
     }
 
     public void InitializeTeam(Team team)
     {
         this.team = team;
 
+        //events
+        events.AddEvent<Team.TeamType>(TeamEvents.TeamEventType.CheckConditions, SetConditions);
+        events.AddEvent(TeamEvents.TeamEventType.ResetPosition, ResetPositions);
+        MatchManager.matchEvents.AddEvent<Team.TeamType>(MatchEvents.MatchEventType.OnTurnStart, OnTurnChange);
+
+        //spawnPlayers
         SpawnPlayers();
     }
 
@@ -84,6 +85,11 @@ public class TeamManager : MonoBehaviour
 
     #region Setter
 
+    private void OnTurnChange(Team.TeamType currTeam)
+    {
+        SetUpTurn(team.teamType == currTeam);
+    }
+
     public void SetUpTurn(bool turn)
     {
         isCurrectTurn = turn;
@@ -96,7 +102,7 @@ public class TeamManager : MonoBehaviour
             player = players[0];
             MatchManager.instance.Spawnball(players[0].GetGridPosition());
         }
-        
+
         GameObject ball = MatchManager.instance.GetBallObject();
         DebugLogger.Log(ball.gameObject.name + ", " + player.gameObject.name, "yellow");
         ball.transform.SetParent(player.ballHolderPosition);
@@ -111,8 +117,10 @@ public class TeamManager : MonoBehaviour
         currentPlayerWithBall = null;
     }
 
-    public void SetConditions()
+    public void SetConditions(Team.TeamType teamType)
     {
+        if (team.teamType != teamType) return;
+
         canPass = canMove = canShoot = canTackle = true;
 
         Vector2Int playerGridPos = currentSelectedPlayer.GetGridPosition();
@@ -137,7 +145,7 @@ public class TeamManager : MonoBehaviour
         //TODO reset all players position
         for (int i = 0; i < players.Count; i++)
         {
-           players[i].SetUpPlayer(this,players[i].GetOrigionalGridPosition());
+            players[i].SetUpPlayer(this, players[i].GetOrigionalGridPosition());
         }
     }
 
@@ -254,6 +262,7 @@ public class TeamManager : MonoBehaviour
     #region Action Execution
 
     // --- Move to the selected Tile ---
+
     #region Movement
 
     private void MoveToTile(GridTile targetTile)
@@ -271,7 +280,7 @@ public class TeamManager : MonoBehaviour
         // Move player to target position
         Vector3 start = currentSelectedPlayer.transform.position;
         Vector3 end = new Vector3(targetTile.WorldPosition.x, start.y, targetTile.WorldPosition.z);
-    
+
         float moveSpeed = currentSelectedPlayer.GetMoveSpeed();
         float t = 0f;
 
@@ -305,6 +314,7 @@ public class TeamManager : MonoBehaviour
     #endregion
 
     // --- Once the target player is selected, pass the ball to that player ---
+
     #region Pass
 
     private void PassToPlayer(GridTile tile)
@@ -332,7 +342,7 @@ public class TeamManager : MonoBehaviour
         if (targetTile == null) yield break;
 
         yield return StartCoroutine(BallController.instance.MoveBall(targetTile));
-        
+
         SetPlayerWithBall(currentPlayerWithBall);
         //GameManager.instance.CheckEndTurn();
     }
@@ -340,6 +350,7 @@ public class TeamManager : MonoBehaviour
     #endregion
 
     // --- Once the AI with ball is in the adjustment tile, Can get the ball back ---
+
     #region Tackle
 
     private void Tackle()
@@ -355,6 +366,7 @@ public class TeamManager : MonoBehaviour
     #endregion
 
     // --- Shoot the ball to goal ---
+
     #region Shoot
 
     private void ShootToGoal()

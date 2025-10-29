@@ -26,7 +26,8 @@ public partial class MatchManager : MonoBehaviour
     private TeamManager playerTeam;
     private TeamManager opponentTeam;
     
-
+    private TeamManager currentTeamOnPlay;
+    
     #region Initialize
 
     private void Awake()
@@ -38,6 +39,7 @@ public partial class MatchManager : MonoBehaviour
         matchEvents.AddEvent<Team.TeamType>(MatchEvents.MatchEventType.OnTeamScored, SetScoredTeam);
         matchEvents.AddEvent(MatchEvents.MatchEventType.OnRoundReset, ResetRound);
         matchEvents.AddEvent(MatchEvents.MatchEventType.OnRoundReset, StopAllTurns);
+        matchEvents.AddEvent<Team.TeamType>(MatchEvents.MatchEventType.OnTurnStart,SetCurrentTeamOnPlay);
         SetUpTurnStates();
     }
 
@@ -52,32 +54,14 @@ public partial class MatchManager : MonoBehaviour
         //Generate Grid
         GridGenerator.instance.GenerateGrid();
         
-        //Spawn Player Team
-        GameObject plTeam = Instantiate(teamPrefab, transform);
-        plTeam.name = "Player Team";
-        Team pTeam = new Team();
-        pTeam.teamName = "Player Team";
-        pTeam.teamType = Team.TeamType.Player;
-        TeamManager pTeamManager = plTeam.GetComponent<TeamManager>();
-        playerTeam = pTeamManager;
-        
-        //Spawn Opponent Team
-        GameObject oppTeam = Instantiate(teamPrefab, transform);
-        oppTeam.name = "Opponent Team";
-        Team oTeam = new Team();
-        oTeam.teamName = "Opponent Team";
-        oTeam.teamType = Team.TeamType.Opponent;
-        TeamManager oTeamManager = oppTeam.GetComponent<TeamManager>();
-        opponentTeam = oTeamManager;
-
-        //Initialize Teams 
-        pTeamManager.InitializeTeam(pTeam);
-        oTeamManager.InitializeTeam(oTeam);
+        //Spawn teams
+        SpawnTeams();
         
         // Random Turn
         int randomTurn = Random.Range(0, 10);
         bool isPlayerTurn = randomTurn < 5;
-
+        
+        // Start turn with delay
         StartCoroutine(StartGameDelay(isPlayerTurn));
     }
     
@@ -131,9 +115,39 @@ public partial class MatchManager : MonoBehaviour
         matchEvents.TriggerEvent(MatchEvents.MatchEventType.OnRoundReset);
     }
 
+    public void SetCurrentTeamOnPlay(Team.TeamType team)
+    {
+        currentTeamOnPlay = (team == Team.TeamType.Player) ? playerTeam : opponentTeam;
+    }
+    
     #endregion
 
     #region Spawners
+
+    private void SpawnTeams()
+    {
+        //Spawn Player Team
+        GameObject plTeam = Instantiate(teamPrefab, transform);
+        plTeam.name = "Player Team";
+        Team pTeam = new Team();
+        pTeam.teamName = "Player Team";
+        pTeam.teamType = Team.TeamType.Player;
+        TeamManager pTeamManager = plTeam.GetComponent<TeamManager>();
+        playerTeam = pTeamManager;
+        
+        //Spawn Opponent Team
+        GameObject oppTeam = Instantiate(teamPrefab, transform);
+        oppTeam.name = "Opponent Team";
+        Team oTeam = new Team();
+        oTeam.teamName = "Opponent Team";
+        oTeam.teamType = Team.TeamType.Opponent;
+        TeamManager oTeamManager = oppTeam.GetComponent<TeamManager>();
+        opponentTeam = oTeamManager;
+
+        //Initialize Teams 
+        pTeamManager.InitializeTeam(pTeam);
+        oTeamManager.InitializeTeam(oTeam);
+    }
 
     public void Spawnball(Vector2Int position)
     {

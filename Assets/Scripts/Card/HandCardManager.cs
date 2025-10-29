@@ -27,7 +27,7 @@ public class HandCardManager : MonoBehaviour
 
     private void Start()
     {
-        //DrawCards();
+        MatchManager.matchEvents.AddEvent<Team.TeamType>(MatchEvents.MatchEventType.OnTurnStart, OnTurnChange);
     }
 
     public void DrawCards()
@@ -91,11 +91,18 @@ public class HandCardManager : MonoBehaviour
 
     public void CheckCards()
     {
-        PlayerController.instance.SetConditions();
+        TeamManager.events.TriggerEvent(TeamEvents.TeamEventType.CheckConditions, Team.TeamType.Player);
 
         foreach (var card in currentHandCards)
         {
-            //card.HandleCardState();
+            card.HandleStates();
         }
+    }
+
+    private void OnTurnChange(Team.TeamType teamType)
+    {
+        if(teamType == Team.TeamType.Player) DrawCards();
+        
+        ClearCards();
     }
 }

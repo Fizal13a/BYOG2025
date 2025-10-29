@@ -41,25 +41,15 @@ public partial class MatchManager : MonoBehaviour
 
         if (team == playerTurnHandler)
         {
-            // Player Turn
+            // Stops AI
             if (currentAITurnCoroutine != null)
             {
                 StopCoroutine(currentAITurnCoroutine);
                 currentAITurnCoroutine = null;
             }
-            
-            HandCardManager.instance.ClearCards();
-            HandCardManager.instance.DrawCards();
-            playerTeam.SetUpTurn(true);
-            opponentTeam.SetUpTurn(false);
         }
-        else
-        {
-            // Opponent Turn
-            HandCardManager.instance.ClearCards();
-            playerTeam.SetUpTurn(false);
-            opponentTeam.SetUpTurn(true);
-        }
+        
+        matchEvents.TriggerEvent(MatchEvents.MatchEventType.OnTurnStart, Team.TeamType.Player);
     }
 
     // --- Turn End ---
@@ -92,12 +82,6 @@ public partial class MatchManager : MonoBehaviour
     public void StopAllTurns()
     {
         currentState = PlayState.Waiting;
-        
-        if (currentAITurnCoroutine != null)
-        {
-            StopCoroutine(currentAITurnCoroutine);
-            currentAITurnCoroutine = null;
-        }
     }
 
     // --- Spend Action Points ---
