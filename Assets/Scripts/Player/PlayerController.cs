@@ -57,7 +57,7 @@ public partial class PlayerController : MonoBehaviour
         if(index<3)
         {
             players[index] = player;
-            player.SetUpPlayer(this, gridPos);
+            //player.SetUpPlayer(this, gridPos);
         }
     }
 

@@ -1454,7 +1454,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &268093561
 Transform:
   m_ObjectHideFlags: 0
@@ -4737,7 +4737,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 929bb39885e01064aa2be4e93258e7a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MatchManager
+  ballPrefab: {fileID: 6843622914399733620, guid: 5ab2eaa897feeab4cbf4bf847a8fbdcb, type: 3}
   teamPrefab: {fileID: 6802688715420847592, guid: e9673ade79ea3c041bfd95b4141abcfb, type: 3}
+  currentState: 0
+  baseActionPoints: 3
+  maxCarryOverPoints: 10
+  turnDisplayText: {fileID: 1921553497}
+  actionPointDisplayText: {fileID: 286973094}
 --- !u!1 &1576105415
 GameObject:
   m_ObjectHideFlags: 0

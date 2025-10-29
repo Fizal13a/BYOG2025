@@ -30,6 +30,11 @@ public class GridGenerator : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        MatchManager.matchEvents.AddEvent(MatchEvents.MatchEventType.OnRoundReset, ResetOccupiedTiles);
+    }
+
     public void GenerateGrid()
     {
         if (gridSettings.gridTilePrefab == null)

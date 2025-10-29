@@ -7,8 +7,12 @@ using Random = UnityEngine.Random;
 public class TeamManager : MonoBehaviour
 {
     public MatchSettings matchSettings;
+    
+    [Header("Events")]
+    public static TeamEvents events;
 
-    [Header("Team")] private Team team;
+    [Header("Team")] 
+    private Team team;
 
     [Header("Players")] public GameObject playerPrefab;
     public GameObject opponentPrefab;
@@ -30,6 +34,14 @@ public class TeamManager : MonoBehaviour
 
     #region Initialization
 
+    private void Awake()
+    {
+        events = new TeamEvents();
+        
+        events.AddEvent(TeamEvents.TeamEventType.CheckConditions, SetConditions);
+        events.AddEvent(TeamEvents.TeamEventType.ResetPosition, ResetPositions);
+    }
+
     public void InitializeTeam(Team team)
     {
         this.team = team;
@@ -43,24 +55,27 @@ public class TeamManager : MonoBehaviour
 
         for (int i = 0; i < matchSettings.maxTeamPlayers; i++)
         {
-            Vector3 pos;
             if (team.teamType == Team.TeamType.Player)
             {
                 GameObject player = Instantiate(playerPrefab, transform);
-                pos = new Vector3(matchSettings.teamPositions[i].x, 0, matchSettings.teamPositions[i].y);
                 player.name = "Player" + i;
-                player.transform.position = pos;
                 Player playerScript = player.GetComponent<Player>();
-                if (playerScript != null) players.Add(playerScript);
+                if (playerScript != null)
+                {
+                    playerScript.SetUpPlayer(this, matchSettings.teamPositions[i]);
+                    players.Add(playerScript);
+                }
             }
             else
             {
                 GameObject opponent = Instantiate(opponentPrefab, transform);
-                pos = new Vector3(matchSettings.opponentPositions[i].x, 0, matchSettings.opponentPositions[i].y);
                 opponent.name = "Opponent" + i;
-                opponent.transform.position = pos;
                 Player playerScript = opponent.GetComponent<Player>();
-                if (playerScript != null) players.Add(playerScript);
+                if (playerScript != null)
+                {
+                    playerScript.SetUpPlayer(this, matchSettings.opponentPositions[i]);
+                    players.Add(playerScript);
+                }
             }
         }
     }
@@ -74,8 +89,14 @@ public class TeamManager : MonoBehaviour
         isCurrectTurn = turn;
     }
 
-    public void SetPlayerWithBall(Player player)
+    public void SetPlayerWithBall(Player player = null)
     {
+        if (player == null) // Initial turn set ball
+        {
+            player = players[0];
+            MatchManager.instance.Spawnball(players[0].GetGridPosition());
+        }
+        
         GameObject ball = MatchManager.instance.GetBallObject();
         DebugLogger.Log(ball.gameObject.name + ", " + player.gameObject.name, "yellow");
         ball.transform.SetParent(player.ballHolderPosition);
@@ -110,6 +131,19 @@ public class TeamManager : MonoBehaviour
 
         Debug.Log($"{canPass} {canTackle} {canShoot}");
     }
+
+    private void ResetPositions()
+    {
+        //TODO reset all players position
+        for (int i = 0; i < players.Count; i++)
+        {
+           players[i].SetUpPlayer(this,players[i].GetOrigionalGridPosition());
+        }
+    }
+
+    #endregion
+
+    #region Checkers
 
     private bool IsBallAdjacent(Vector2Int playerGridPos)
     {
@@ -340,9 +374,7 @@ public class TeamManager : MonoBehaviour
         if (targetTile == null) yield break;
 
         yield return StartCoroutine(BallController.instance.BallShoot(targetTile));
-        
-        //UIManager.instance.AddPlayerScore(1);
-        //GameManager.instance.ResetRound();
+        MatchManager.matchEvents.TriggerEvent(MatchEvents.MatchEventType.OnTeamScored, team.teamType);
     }
 
     #endregion

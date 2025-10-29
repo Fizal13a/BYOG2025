@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    private PlayerController controller;
+    private TeamManager teamManager;
     public Transform ballHolderPosition;
     
     [Header("Stats")]
@@ -12,18 +12,34 @@ public class Player : MonoBehaviour
     
     [Header("Grid Data")] 
     private Vector2Int GridPosition;
+    private Vector2Int origionalGridPosition;
     
-    public void SetUpPlayer(PlayerController playerController, Vector2Int gridPosition)
+    public void SetUpPlayer(TeamManager team, Vector2Int gridPosition)
     {
-        controller = playerController;
+        teamManager = team;
+        
+        //Set position
+        Vector3 pos = new Vector3(gridPosition.x, 0, gridPosition.y);
+        transform.position = pos;
+        
+        //Set values
         SetGridPosition(gridPosition);
+        SetOrigionalGridPosition(gridPosition);
     }
 
     public void SetGridPosition(Vector2Int gridPosition)
     {
         GridPosition = gridPosition;
+        GridTile playerCurrTile = GridGenerator.instance.GetTile(gridPosition);
+        if(playerCurrTile != null) playerCurrTile.SetOccupied(true);
+    }
+
+    public void SetOrigionalGridPosition(Vector2Int origionalGridPos)
+    {
+        origionalGridPosition = origionalGridPos;
     }
     
     public Vector2Int GetGridPosition() => GridPosition;
+    public Vector2Int GetOrigionalGridPosition() => origionalGridPosition;
     public float GetMoveSpeed() => moveSpeed;
 }
