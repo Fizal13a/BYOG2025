@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -16,105 +15,32 @@ public class AIStrategy
 
     public DecisionType decision;
     public float score;
-    public AIPlayer targetPlayer;
+    public Player targetPlayer;
 }
 
-public partial class AIPlayerController : MonoBehaviour
+public class AIHandler : MonoBehaviour
 {
-    public static AIPlayerController instance;
-    
     public List<ActionData> availableActions = new List<ActionData>();
     private ActionData currentAction;
 
+    private TeamManager teamManager;
+    
     [Header("Game Data")] 
     public LayerMask playerLayer;
+
+    private Player currentSelectedAI;
     
-    [Header("AIs Data")]
-    private AIPlayer[] ais;
-    private bool hasBall = false;
-    public AIPlayer currentAIWithBall = null;
-    public AIPlayer currentSelectedAI = null;
-    public AIPlayer currentPassTargetAI = null;
-    [SerializeField] private GridTile goalTile;
-    private bool isAITurn = false;
-
-    private void Awake()
+    public void SetAI(TeamManager team)
     {
-        if (instance == null)
-        {
-            instance = this;
-        }
+        teamManager =  team;
     }
-
-    public void SetUpAIs()
+    
+    IEnumerator PlayAITurn(bool turn)
     {
-        ais = new AIPlayer[3];
-        goalTile = GameManager.instance.GetAIGoalTile();
-    }
-
-    public void AddAI(AIPlayer player, Vector2Int gridPos, int index)
-    {
-        if(index < 3)
-        {
-            ais[index] = player;
-            player.SetUpPlayer(this, gridPos);
-        }
-    }
-
-    public void RemoveBall()
-    {
-        if (hasBall && currentAIWithBall != null)
-        {
-            hasBall = false;
-            currentAIWithBall = null;
-        }
-    }
-
-    public void HasBall(bool status)
-    {
-        hasBall = status;
-    }
-
-    public void SetPlayerWithBall(AIPlayer player)
-    {
-        GameObject ball = GameManager.instance.GetBallObject();
-        ball.transform.SetParent(player.ballHolderPosition);
-        ball.transform.localPosition = Vector3.zero;
-        GameManager.instance.SetBallPosition(player.GetGridPosition());
-        currentAIWithBall = player;
-        hasBall = true;
-        currentPassTargetAI = null;
-    }
-
-    public void SetSelectedPlayer(AIPlayer player)
-    {
-        currentSelectedAI = player;
-    }
-
-    public void SetUpTurn(bool turn)
-    {
-        isAITurn = turn;
-        if (isAITurn)
-        {
-            StartCoroutine(DelayAITurnStart());
-        }
-    }
-
-    IEnumerator DelayAITurnStart()
-    {
-        yield return new WaitForSeconds(1);
-        if (isAITurn) // Double check turn hasn't ended
-        {
-            StartCoroutine(PlayAITurn());
-        }
-    }
-
-    IEnumerator PlayAITurn()
-    {
-        while (isAITurn)
+        while (turn)
         {
             // Check if turn is still active
-            if (!isAITurn)
+            if (!turn)
             {
                 Debug.Log("AI: Turn ended, stopping execution");
                 break;
@@ -130,10 +56,10 @@ public partial class AIPlayerController : MonoBehaviour
             }
 
             // Execute the decided action
-            yield return StartCoroutine(ExecuteAction(strategy));
+            yield return StartCoroutine(ExecuteAction(strategy, turn));
 
             // Check if turn is still active after action
-            if (!isAITurn)
+            if (!turn)
             {
                 Debug.Log("AI: Turn ended during action execution");
                 break;
@@ -143,19 +69,21 @@ public partial class AIPlayerController : MonoBehaviour
         }
 
         // Final check to end turn properly
-        if (isAITurn)
+        if (turn)
         {
-            isAITurn = false;
-            GameManager.instance.CheckEndTurn();
+            turn = false;
+            MatchManager.instance.CheckEndTurn();
         }
     }
+
+    #region Evaluation
 
     private AIStrategy EvaluateBestMove()
     {
         List<AIStrategy> strategies = new List<AIStrategy>();
 
         // Evaluate all possible moves
-        if (hasBall && currentAIWithBall != null)
+        if (teamManager.CheckBallStatus() && teamManager.GetCurrentPlayerWithBall() != null)
         {
             // AI has ball - prioritize scoring or advancing
             EvaluateShoot(strategies);
@@ -191,10 +119,10 @@ public partial class AIPlayerController : MonoBehaviour
         if (!HasActionPoints(ActionData.Actions.Shoot))
             return;
 
-        GridTile aiTile = GridGenerator.instance.GetTile(
-            currentAIWithBall.GetGridPosition());
+        Vector2Int playerPos = teamManager.GetCurrentPlayerWithBall().GetGridPosition();
+        GridTile aiTile = GridGenerator.instance.GetTile(playerPos);
         
-        int distToGoal = ManhattanDistance(aiTile.GridPosition, goalTile.GridPosition);
+        int distToGoal = ManhattanDistance(aiTile.GridPosition, GridGenerator.instance.GetOpponentGoalTile().GridPosition);
 
         // Only shoot if within 2 tiles of goal
         if (distToGoal <= 2)
@@ -215,32 +143,30 @@ public partial class AIPlayerController : MonoBehaviour
         if (!HasActionPoints(ActionData.Actions.Pass))
             return;
 
-        AIPlayer passTarget = FindAdjacentTeammate();
+        Player passTarget = FindAdjacentTeammate();
         
         if (passTarget == null)
             return;
 
         float score = 0;
 
-        if (HasAdjacentEnemy(currentAIWithBall))
+        if (HasAdjacentEnemy(teamManager.GetCurrentPlayerWithBall()))
         {
             score = 800;
             Debug.Log("AI Pass Option: Enemies nearby! Score: 800");
         }
         else
         {
-            // GridTile targetTile = GridGenerator.instance.GetTile(
-            //     passTarget.GetGridPosition().x, 
-            //     passTarget.GetGridPosition().y);
-            //
-            // int targetDistToGoal = ManhattanDistance(targetTile.GridPosition, goalTile.GridPosition);
-            // int currentDistToGoal = ManhattanDistance(currentAIWithBall.GetGridPosition(), goalTile.GridPosition);
-            //
-            // if (targetDistToGoal < currentDistToGoal)
-            // {
-            //     score = 300;
-            //     Debug.Log($"AI Pass Option: Target closer to goal. Score: {score}");
-            // }
+            GridTile targetTile = GridGenerator.instance.GetTile(passTarget.GetGridPosition());
+            
+            int targetDistToGoal = ManhattanDistance(targetTile.GridPosition, GridGenerator.instance.GetOpponentGoalTile().GridPosition);
+            int currentDistToGoal = ManhattanDistance(teamManager.GetCurrentPlayerWithBall().GetGridPosition(), GridGenerator.instance.GetOpponentGoalTile().GridPosition);
+            
+            if (targetDistToGoal < currentDistToGoal)
+            {
+                score = 300;
+                Debug.Log($"AI Pass Option: Target closer to goal. Score: {score}");
+            }
         }
 
         if (score > 0)
@@ -261,14 +187,14 @@ public partial class AIPlayerController : MonoBehaviour
 
         float score = 0;
 
-        if (hasBall && currentAIWithBall != null)
+        if (teamManager.CheckBallStatus() && teamManager.GetCurrentPlayerWithBall() != null)
         {
             GridTile aiTile = GridGenerator.instance.GetTile(
-                currentAIWithBall.GetGridPosition());
+                teamManager.GetCurrentPlayerWithBall().GetGridPosition());
             
-            int distToGoal = ManhattanDistance(aiTile.GridPosition, goalTile.GridPosition);
+            int distToGoal = ManhattanDistance(aiTile.GridPosition, GridGenerator.instance.GetOpponentGoalTile().GridPosition);
 
-            if (!HasAdjacentEnemy(currentAIWithBall))
+            if (!HasAdjacentEnemy(teamManager.GetCurrentPlayerWithBall()))
             {
                 score = 500 - (distToGoal * 50);
                 Debug.Log($"AI Move Option: Advancing toward goal. Distance: {distToGoal}, Score: {score}");
@@ -281,8 +207,8 @@ public partial class AIPlayerController : MonoBehaviour
         }
         else
         {
-            Vector2Int ballPos = GameManager.instance.GetCurrentBallPosition();
-            AIPlayer closestAI = GetClosestAIToBall();
+            Vector2Int ballPos = MatchManager.instance.GetCurrentBallPosition();
+            Player closestAI = GetClosestAIToBall();
 
             if (closestAI != null)
             {
@@ -309,16 +235,16 @@ public partial class AIPlayerController : MonoBehaviour
         if (!HasActionPoints(ActionData.Actions.Tackle))
             return;
 
-        Vector2Int ballPos = GameManager.instance.GetCurrentBallPosition();
+        Vector2Int ballPos = MatchManager.instance.GetCurrentBallPosition();
         GridTile ballTile = GridGenerator.instance.GetTile(ballPos);
 
-        AIPlayer tackler = GetAIAdjacentToBall(ballTile);
+        Player tackler = GetAIAdjacentToBall(ballTile);
 
         if (tackler != null)
         {
             currentSelectedAI = tackler;
             
-            int distToGoal = ManhattanDistance(ballPos, goalTile.GridPosition);
+            int distToGoal = ManhattanDistance(ballPos, GridGenerator.instance.GetOpponentGoalTile().GridPosition);
             float score = 700 - (distToGoal * 50);
             
             strategies.Add(new AIStrategy 
@@ -331,7 +257,11 @@ public partial class AIPlayerController : MonoBehaviour
         }
     }
 
-    IEnumerator ExecuteAction(AIStrategy strategy)
+    #endregion
+
+    #region Execution
+
+    IEnumerator ExecuteAction(AIStrategy strategy, bool isAITurn)
     {
         // Safety check: verify turn is still active
         if (!isAITurn)
@@ -353,7 +283,7 @@ public partial class AIPlayerController : MonoBehaviour
                 break;
         }
         
-        GameManager.instance.CheckEndTurn();
+        MatchManager.instance.CheckEndTurn();
 
         // After action, check if we should continue
         if (!isAITurn)
@@ -362,31 +292,31 @@ public partial class AIPlayerController : MonoBehaviour
             yield break;
         }
     }
-
+    
     IEnumerator ExecuteMove()
     {
-        if (!GameManager.instance.CheckActionPoints(GetActionCost(ActionData.Actions.Move)))
+        if (!MatchManager.instance.CheckActionPoints(GetActionCost(ActionData.Actions.Move)))
         {
             yield break;
         }
 
-        if (hasBall && currentAIWithBall != null)
+        if (teamManager.CheckBallStatus() && teamManager.GetCurrentPlayerWithBall() != null)
         {
-            GridTile currentTile = GridGenerator.instance.GetTile(
-                currentAIWithBall.GetGridPosition());
+            GridTile currentTile =
+                GridGenerator.instance.GetTile(teamManager.GetCurrentPlayerWithBall().GetGridPosition());
+               
             
-            GridTile nextTile = GetNextTileToward(currentTile, goalTile);
+            GridTile nextTile = GetNextTileToward(currentTile, GridGenerator.instance.GetOpponentGoalTile());
 
             if (nextTile != null)
             {
-                Debug.Log($"{currentAIWithBall.name} moving toward goal");
-                MoveToTile(currentAIWithBall, nextTile);
-                GameManager.instance.SetBallPosition(nextTile.GridPosition);
+                Debug.Log($"{teamManager.GetCurrentPlayerWithBall().name} moving toward goal");
+                yield return StartCoroutine(teamManager.ExecuteMove(nextTile));
             }
         }
         else if (currentSelectedAI != null)
         {
-            Vector2Int ballPos = GameManager.instance.GetCurrentBallPosition();
+            Vector2Int ballPos = MatchManager.instance.GetCurrentBallPosition();
             GridTile ballTile = GridGenerator.instance.GetTile(ballPos);
             
             GridTile currentTile = GridGenerator.instance.GetTile(
@@ -397,43 +327,25 @@ public partial class AIPlayerController : MonoBehaviour
             if (nextTile != null)
             {
                 Debug.Log($"{currentSelectedAI.name} moving toward ball");
-                MoveToTile(currentSelectedAI, nextTile);
+                yield return StartCoroutine(teamManager.ExecuteMove(nextTile));
             }
         }
-
-        yield return new WaitForSeconds(2f);
     }
 
-    IEnumerator ExecutePass(AIPlayer receiver)
+    IEnumerator ExecutePass(Player receiver)
     {
-        if (!GameManager.instance.CheckActionPoints(GetActionCost(ActionData.Actions.Pass)))
+        if (!MatchManager.instance.CheckActionPoints(GetActionCost(ActionData.Actions.Pass)))
         {
             yield break;
         }
 
-        if (currentAIWithBall == null || receiver == null)
+        if (teamManager.GetCurrentPlayerWithBall() == null || receiver == null)
             yield break;
 
-        Debug.Log($"{currentAIWithBall.name} passing to {receiver.name}");
+        Debug.Log($"{teamManager.GetCurrentPlayerWithBall().name} passing to {receiver.name}");
 
-        //#region Play Animation
+        yield return StartCoroutine(teamManager.ExecuteMove());
 
-        //Animator animator = currentAIWithBall.GetComponentInChildren<Animator>();
-        //AnimationManager.Instance.PassAnim(animator);
-
-        //#endregion
-
-        GridTile targetTile = GridGenerator.instance.GetTile(
-            receiver.GetGridPosition());
-
-        currentPassTargetAI = receiver;
-        yield return StartCoroutine(MoveBallInArc(
-            BallController.instance.gameObject.transform, 
-            targetTile.transform.position));
-
-        SetPlayerWithBall(receiver);
-        
-        yield return new WaitForSeconds(2f);
     }
 
     IEnumerator ExecuteTackle()
@@ -491,52 +403,10 @@ public partial class AIPlayerController : MonoBehaviour
         GameManager.instance.ResetRound();
     }
 
-    public IEnumerator MoveBallInArc(Transform ball, Vector3 targetPosition, float arcHeight = 2f, float duration = 1f)
-    {
-        Vector3 startPos = ball.transform.position;
-        float elapsed = 0f;
+    #endregion
 
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime;
-            float t = Mathf.Clamp01(elapsed / duration);
-            float smoothT = Mathf.Pow(t, 5f);
-
-            Vector3 pos = Vector3.Lerp(startPos, targetPosition, smoothT);
-            float heightOffset = Mathf.Sin(smoothT * Mathf.PI) * arcHeight;
-            pos.y += heightOffset + 0.3f;
-
-            ball.position = pos;
-            yield return null;
-        }
-
-        ball.position = targetPosition;
-    }
-
-    public IEnumerator MoveBallToShoot(Transform ball, Vector3 targetPosition, float arcHeight = 2f, float duration = 1f)
-    {
-        Vector3 startPos = ball.transform.position;
-        float elapsed = 0f;
-
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime;
-            float t = Mathf.Clamp01(elapsed / duration);
-            float smoothT = Mathf.Pow(t, 5f);
-
-            Vector3 pos = Vector3.Lerp(startPos, targetPosition, smoothT);
-            float heightOffset = Mathf.Sin(smoothT * Mathf.PI) * arcHeight;
-            pos.y += heightOffset + 0.3f;
-
-            ball.position = pos;
-            yield return null;
-        }
-
-        ball.position = targetPosition;
-    }
-
-    // === Helper Methods ===
-
+    #region Getters
+    
     private int ManhattanDistance(Vector2Int pos1, Vector2Int pos2)
     {
         return Mathf.Abs(pos1.x - pos2.x) + Mathf.Abs(pos1.y - pos2.y);
@@ -556,28 +426,28 @@ public partial class AIPlayerController : MonoBehaviour
         }
         return 0;
     }
-
-    private AIPlayer FindAdjacentTeammate()
+    
+    private Player FindAdjacentTeammate()
     {
         Vector2Int[] directions = GetAdjacentDirections();
 
         foreach (var dir in directions)
         {
-            Vector2Int checkPos = currentAIWithBall.GetGridPosition() + dir;
+            Vector2Int checkPos = teamManager.GetCurrentPlayerWithBall().GetGridPosition() + dir;
             GridTile tile = GridGenerator.instance.GetTile(checkPos);
             
             if (tile != null && tile.IsOccupied())
             {
-                AIPlayer occupant = GetAIAtPosition(checkPos);
-                if (occupant != null && occupant != currentAIWithBall)
+                Player occupant = GetAIAtPosition(checkPos);
+                if (occupant != null && occupant != teamManager.GetCurrentPlayerWithBall())
                     return occupant;
             }
         }
 
         return null;
     }
-
-    private bool HasAdjacentEnemy(AIPlayer ai)
+    
+     private bool HasAdjacentEnemy(Player ai)
     {
         Vector2Int[] directions = GetAdjacentDirections();
 
@@ -588,7 +458,7 @@ public partial class AIPlayerController : MonoBehaviour
             
             if (tile != null && tile.IsOccupied())
             {
-                AIPlayer occupant = GetAIAtPosition(checkPos);
+                Player occupant = GetAIAtPosition(checkPos);
                 if (occupant != null && occupant != ai)
                     return true;
             }
@@ -597,14 +467,14 @@ public partial class AIPlayerController : MonoBehaviour
         return false;
     }
 
-    private AIPlayer GetAIAdjacentToBall(GridTile ballTile)
+    private Player GetAIAdjacentToBall(GridTile ballTile)
     {
         Vector2Int[] directions = GetAdjacentDirections();
 
         foreach (var dir in directions)
         {
             Vector2Int checkPos = ballTile.GridPosition + dir;
-            AIPlayer ai = GetAIAtPosition(checkPos);
+            Player ai = GetAIAtPosition(checkPos);
             if (ai != null)
                 return ai;
         }
@@ -612,13 +482,13 @@ public partial class AIPlayerController : MonoBehaviour
         return null;
     }
 
-    private AIPlayer GetClosestAIToBall()
+    private Player GetClosestAIToBall()
     {
-        Vector2Int ballPos = GameManager.instance.GetCurrentBallPosition();
-        AIPlayer closest = null;
+        Vector2Int ballPos = MatchManager.instance.GetCurrentBallPosition();
+        Player closest = null;
         int minDist = int.MaxValue;
 
-        foreach (AIPlayer ai in ais)
+        foreach (Player ai in teamManager.GetAllPlayers())
         {
             if (ai == null) continue;
             
@@ -633,9 +503,9 @@ public partial class AIPlayerController : MonoBehaviour
         return closest;
     }
 
-    private AIPlayer GetAIAtPosition(Vector2Int pos)
+    private Player GetAIAtPosition(Vector2Int pos)
     {
-        foreach (AIPlayer ai in ais)
+        foreach (Player ai in teamManager.GetAllPlayers())
         {
             if (ai != null && ai.GetGridPosition() == pos)
                 return ai;
@@ -690,4 +560,6 @@ public partial class AIPlayerController : MonoBehaviour
             new Vector2Int(-1, -1)
         };
     }
+
+    #endregion
 }

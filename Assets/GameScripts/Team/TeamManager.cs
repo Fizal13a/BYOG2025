@@ -8,11 +8,14 @@ public class TeamManager : MonoBehaviour
 {
     public MatchSettings matchSettings;
 
-    [Header("Events")] public static TeamEvents events;
+    [Header("Events")] 
+    public static TeamEvents events;
 
-    [Header("Team")] private Team team;
+    [Header("Team")] 
+    private Team team;
 
-    [Header("Players")] public GameObject playerPrefab;
+    [Header("Players")] 
+    public GameObject playerPrefab;
     public GameObject opponentPrefab;
     private List<Player> players = new List<Player>();
 
@@ -24,7 +27,9 @@ public class TeamManager : MonoBehaviour
     [Header("Actions")] public List<ActionData> availableActions = new List<ActionData>();
     private ActionData currentAction;
 
-    [Header("Condition bool")] private bool canSelect = false;
+    [Header("Condition bool")] 
+    private bool hasBall = false;
+    private bool canSelect = false;
     private bool canPass = false;
     private bool canMove = false;
     private bool canTackle = false;
@@ -84,6 +89,11 @@ public class TeamManager : MonoBehaviour
     #endregion
 
     #region Setter
+
+    private void SetBallStatus(bool status)
+    {
+        hasBall = status;
+    }
 
     private void OnTurnChange(Team.TeamType currTeam)
     {
@@ -151,6 +161,25 @@ public class TeamManager : MonoBehaviour
 
     #endregion
 
+    #region Getters
+
+    public List<Player> GetAllPlayers()
+    {
+        return players;
+    }
+
+    public bool CheckBallStatus()
+    {
+        return hasBall;
+    }
+
+    public Player GetCurrentPlayerWithBall()
+    {
+        return currentPlayerWithBall;
+    }
+
+    #endregion
+
     #region Checkers
 
     private bool IsBallAdjacent(Vector2Int playerGridPos)
@@ -200,32 +229,30 @@ public class TeamManager : MonoBehaviour
 
     public void HandleStates(ActionData.Actions state, Player currPlayer)
     {
+        StartCoroutine(HandleState(state, currPlayer));
+    }
+
+    private IEnumerator HandleState(ActionData.Actions state, Player currPlayer)
+    {
         currentSelectedPlayer = currPlayer;
         currentAction = GetAction(state);
+        
         // Clear all highlighted tiles
         GridGenerator.instance.ClearHighlightedTiles();
         // Checks for action points
-        if (!GameManager.instance.CheckActionPoints(currentAction.actionCost)) return;
+        if (!MatchManager.instance.CheckActionPoints(currentAction.actionCost)) yield break;
+        
         // Actions state handling
         switch (state)
         {
             case ActionData.Actions.Move:
                 DebugLogger.Log("Player On Move State", "yellow");
-                GridGenerator.instance.HighlightMoveTiles(currentSelectedPlayer);
-                canSelect = true;
+                yield return StartCoroutine(CheckForTargetTileSelection());
                 break;
 
             case ActionData.Actions.Pass:
-                foreach (var player in players)
-                {
-                    if (player == currentPlayerWithBall) continue;
-
-                    Vector2Int positionIndex = player.GetGridPosition();
-                    GridGenerator.instance.HighlightPassTiles(positionIndex);
-                }
-
                 DebugLogger.Log("Player On Pass State", "yellow");
-                canSelect = true;
+                yield return StartCoroutine(CheckForTargetPlayerSelection());
                 break;
 
             case ActionData.Actions.Tackle:
@@ -244,33 +271,53 @@ public class TeamManager : MonoBehaviour
         }
     }
 
-    private ActionData GetAction(ActionData.Actions action)
+    private IEnumerator CheckForTargetTileSelection()
     {
-        foreach (var act in availableActions)
+        GridGenerator.instance.HighlightMoveTiles(currentSelectedPlayer);
+        GridTile moveTargTile = new GridTile();
+        canSelect = true;
+
+        while (canSelect)
         {
-            if (act.action == action)
+            
+            yield return null;
+        }
+
+        yield return StartCoroutine(ExecuteMove(moveTargTile));
+    }
+
+    private IEnumerator CheckForTargetPlayerSelection()
+    {
+        foreach (var player in players)
+        {
+            if (player == currentPlayerWithBall) continue;
+
+            Vector2Int positionIndex = player.GetGridPosition();
+            GridGenerator.instance.HighlightPassTiles(positionIndex);
+        }
+        canSelect = true;
+        
+        GridTile tile = new GridTile();
+        
+        while (canSelect)
+        {
+            
+            yield return null;
+        }
+        
+        foreach (var player in players)
+        {
+            if (player.GetGridPosition() == tile.GridPosition)
             {
-                return act;
+                currentPassTarget = player;
+                break;
             }
         }
 
-        return null;
+        ExecutePass(currentPassTarget);
     }
-
-    #endregion
-
-    #region Action Execution
-
-    // --- Move to the selected Tile ---
-
-    #region Movement
-
-    private void MoveToTile(GridTile targetTile)
-    {
-        StartCoroutine(MoveToTileRoutine(targetTile));
-    }
-
-    private IEnumerator MoveToTileRoutine(GridTile targetTile)
+    
+    public IEnumerator ExecuteMove(GridTile targetTile)
     {
         // Update tile occupancy
         GridTile currentTile = GridGenerator.instance.GetTile(currentSelectedPlayer.GetGridPosition());
@@ -309,6 +356,44 @@ public class TeamManager : MonoBehaviour
 
         //GameManager.instance.CheckEndTurn();
         currentSelectedPlayer = null;
+        
+        yield return null;
+    }
+
+    public IEnumerator ExecutePass(Player targetPlayer)
+    {
+        yield return null;
+    }
+
+    private ActionData GetAction(ActionData.Actions action)
+    {
+        foreach (var act in availableActions)
+        {
+            if (act.action == action)
+            {
+                return act;
+            }
+        }
+
+        return null;
+    }
+
+    #endregion
+
+    #region Action Execution
+
+    // --- Move to the selected Tile ---
+
+    #region Movement
+
+    private void MoveToTile(GridTile targetTile)
+    {
+        StartCoroutine(MoveToTileRoutine(targetTile));
+    }
+
+    private IEnumerator MoveToTileRoutine(GridTile targetTile)
+    {
+       
     }
 
     #endregion

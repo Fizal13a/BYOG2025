@@ -7,7 +7,8 @@ public class GridGenerator : MonoBehaviour
 {
     public static GridGenerator instance;
 
-    [Header("Grid Settings")] public Transform gridParent;
+    [Header("Grid Settings")] 
+    public Transform gridParent;
     public GridSettings gridSettings;
     public MatchSettings matchSettings;
 
@@ -19,6 +20,10 @@ public class GridGenerator : MonoBehaviour
 
     [HideInInspector] public List<GridTile> allTiles = new List<GridTile>();
     public GridTile goalTile;
+    
+    [Header("Match Datas")]
+    private GridTile playerGoalTile;
+    private GridTile opponentGoalTile;
 
     #region Initialization
 
@@ -83,7 +88,7 @@ public class GridGenerator : MonoBehaviour
                     position.y = 0.4f;
                     GameObject goal = Instantiate(goalPost, position, Quaternion.identity, transform);
                     goal.transform.SetParent(tile.transform);
-                    //GameManager.instance.SetAIGoalTile(tileScript);
+                    SetOpponentGoalTile(tileScript);
                 }
 
                 if (matchSettings.teamGoalPosition == new Vector2Int(x, y))
@@ -92,7 +97,7 @@ public class GridGenerator : MonoBehaviour
                     GameObject goal = Instantiate(goalPost, position, Quaternion.identity, transform);
                     goal.transform.rotation = Quaternion.Euler(0, 180, 0);
                     goal.transform.SetParent(tile.transform);
-                    //GameManager.instance.SetPlayerGoalTile(tileScript);
+                    SetPlayerGoalTile(tileScript);
                 }
 
                 grid[x, y] = tile;
@@ -153,6 +158,16 @@ public class GridGenerator : MonoBehaviour
 
     #region Getters
 
+    public GridTile GetPlayerGoalTile()
+    {
+        return playerGoalTile;
+    }
+
+    public GridTile GetOpponentGoalTile()
+    {
+        return opponentGoalTile;
+    }
+
     public GameObject GetTileObject(int x, int y)
     {
         if (x < 0 || x >= gridSettings.gridWidth || y < 0 || y >= gridSettings.gridHeight) return null;
@@ -169,6 +184,16 @@ public class GridGenerator : MonoBehaviour
 
     #region Setters
 
+    private void SetPlayerGoalTile(GridTile tile)
+    {
+        playerGoalTile = tile;
+    }
+
+    private void SetOpponentGoalTile(GridTile tile)
+    {
+        opponentGoalTile = tile;
+    }
+    
     public void ResetOccupiedTiles()
     {
         if (gridTiles == null) return;

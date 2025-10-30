@@ -22,6 +22,7 @@ public partial class MatchManager : MonoBehaviour
 
     [Header("Team Data")] 
     public GameObject teamPrefab;
+    public GameObject aiTeamPrefab;
 
     private TeamManager playerTeam;
     private TeamManager opponentTeam;
@@ -126,6 +127,8 @@ public partial class MatchManager : MonoBehaviour
 
     private void SpawnTeams()
     {
+        GameObject oppTeamPrefab = (GameManager.instance.GetCurrentMode() == MatchData.MatchMode.PlayWithFriend) ? teamPrefab : aiTeamPrefab;
+        
         //Spawn Player Team
         GameObject plTeam = Instantiate(teamPrefab, transform);
         plTeam.name = "Player Team";
@@ -136,7 +139,7 @@ public partial class MatchManager : MonoBehaviour
         playerTeam = pTeamManager;
         
         //Spawn Opponent Team
-        GameObject oppTeam = Instantiate(teamPrefab, transform);
+        GameObject oppTeam = Instantiate(oppTeamPrefab, transform);
         oppTeam.name = "Opponent Team";
         Team oTeam = new Team();
         oTeam.teamName = "Opponent Team";
