@@ -34,17 +34,17 @@ public class CameraManager : MonoBehaviour
     #region Updating Cinemachine camera Target
     private void UpdateCameraTarget()
     {
-        if (GameManager.instance.currentState == GameSettings.GameState.PlayerTurn && PlayerController.instance.currentSelectedPlayer != null)
-        {
-            Transform currentSelectedPlayer = PlayerController.instance.currentSelectedPlayer.transform;
-
-            cine_camera.LookAt = currentSelectedPlayer;
-            cine_camera.Follow = currentSelectedPlayer;
-        }
-        else
-        {
-            ResetCamPos();
-        }
+        // if (GameManager.instance.currentState == GameSettings.GameState.PlayerTurn && PlayerController.instance.currentSelectedPlayer != null)
+        // {
+        //     Transform currentSelectedPlayer = PlayerController.instance.currentSelectedPlayer.transform;
+        //
+        //     cine_camera.LookAt = currentSelectedPlayer;
+        //     cine_camera.Follow = currentSelectedPlayer;
+        // }
+        // else
+        // {
+        //     ResetCamPos();
+        // }
 
     }
 

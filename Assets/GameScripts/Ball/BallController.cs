@@ -67,7 +67,7 @@ public class BallController : MonoBehaviour
     {
         if (targetTile == null) yield break;
 
-        GameObject ball = GameManager.instance.GetBallObject();
+        GameObject ball = MatchManager.instance.GetBallObject();
 
         Vector3 startPos = ball.transform.position;
         Vector3 endPos = targetTile.position;

@@ -86,7 +86,7 @@ public class Card : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHand
             var dropTarget = hit.collider.GetComponent<Player>();
             if (dropTarget != null)
             {
-                PlayerController.instance.HandleStates(currentAction.actionType, dropTarget);
+                //PlayerController.instance.HandleStates(currentAction.actionType, dropTarget);
                 Destroy(gameObject);
             }
         }

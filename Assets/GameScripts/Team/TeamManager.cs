@@ -393,7 +393,7 @@ public class TeamManager : MonoBehaviour
 
     private IEnumerator MoveToTileRoutine(GridTile targetTile)
     {
-       
+       yield break;
     }
 
     #endregion

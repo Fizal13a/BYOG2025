@@ -334,73 +334,74 @@ public class AIHandler : MonoBehaviour
 
     IEnumerator ExecutePass(Player receiver)
     {
-        if (!MatchManager.instance.CheckActionPoints(GetActionCost(ActionData.Actions.Pass)))
-        {
-            yield break;
-        }
-
-        if (teamManager.GetCurrentPlayerWithBall() == null || receiver == null)
-            yield break;
-
-        Debug.Log($"{teamManager.GetCurrentPlayerWithBall().name} passing to {receiver.name}");
-
-        yield return StartCoroutine(teamManager.ExecuteMove());
-
+        // if (!MatchManager.instance.CheckActionPoints(GetActionCost(ActionData.Actions.Pass)))
+        // {
+        //     yield break;
+        // }
+        //
+        // if (teamManager.GetCurrentPlayerWithBall() == null || receiver == null)
+        //     yield break;
+        //
+        // Debug.Log($"{teamManager.GetCurrentPlayerWithBall().name} passing to {receiver.name}");
+        //
+        // yield return StartCoroutine(teamManager.ExecuteMove());
+        yield break;
     }
 
     IEnumerator ExecuteTackle()
     {
-        if (!GameManager.instance.CheckActionPoints(GetActionCost(ActionData.Actions.Tackle)))
-        {
-            yield break;
-        }
-
-        if (currentSelectedAI == null)
-            yield break;
-
-        Debug.Log($"{currentSelectedAI.name} tackling for the ball");
-
-
-        //#region Play Animation
-
-        //Animator animator = currentSelectedAI.GetComponentInChildren<Animator>();
-        //AnimationManager.Instance.TackleAnim(animator);
-
-        //#endregion
-
-        SetPlayerWithBall(currentSelectedAI);
-        PlayerController.instance.RemovePlayerWithBall();
-        GameManager.instance.SetBallPosition(currentSelectedAI.GetGridPosition());
+        // if (!GameManager.instance.CheckActionPoints(GetActionCost(ActionData.Actions.Tackle)))
+        // {
+        //     yield break;
+        // }
+        //
+        // if (currentSelectedAI == null)
+        //     yield break;
+        //
+        // Debug.Log($"{currentSelectedAI.name} tackling for the ball");
+        //
+        //
+        // //#region Play Animation
+        //
+        // //Animator animator = currentSelectedAI.GetComponentInChildren<Animator>();
+        // //AnimationManager.Instance.TackleAnim(animator);
+        //
+        // //#endregion
+        //
+        // SetPlayerWithBall(currentSelectedAI);
+        // PlayerController.instance.RemovePlayerWithBall();
+        // GameManager.instance.SetBallPosition(currentSelectedAI.GetGridPosition());
 
         yield return new WaitForSeconds(2f);
     }
 
     IEnumerator ExecuteShoot()
     {
-        if (!GameManager.instance.CheckActionPoints(GetActionCost(ActionData.Actions.Shoot)))
-        {
-            yield break;
-        }
-
-        if (currentAIWithBall == null)
-            yield break;
-
-        Debug.Log($"{currentAIWithBall.name} shooting at goal!");
-
-        //#region Play Animation
-        //Animator animator = currentAIWithBall.GetComponentInChildren<Animator>();
-        //AnimationManager.Instance.ShootAnim(animator);
-        //#endregion
-
-        GameObject ball = GameManager.instance.GetBallObject();
-        Transform goalTileTrans = GameManager.instance.GetAIGoalTile().transform;
-
-        yield return StartCoroutine(MoveBallToShoot(
-            ball.transform, 
-            new Vector3(goalTileTrans.position.x, goalTileTrans.position.y, goalTileTrans.position.z)));
-
-        UIManager.instance.AddAIScore(1);
-        GameManager.instance.ResetRound();
+        // if (!GameManager.instance.CheckActionPoints(GetActionCost(ActionData.Actions.Shoot)))
+        // {
+        //     yield break;
+        // }
+        //
+        // if (currentAIWithBall == null)
+        //     yield break;
+        //
+        // Debug.Log($"{currentAIWithBall.name} shooting at goal!");
+        //
+        // //#region Play Animation
+        // //Animator animator = currentAIWithBall.GetComponentInChildren<Animator>();
+        // //AnimationManager.Instance.ShootAnim(animator);
+        // //#endregion
+        //
+        // GameObject ball = GameManager.instance.GetBallObject();
+        // Transform goalTileTrans = GameManager.instance.GetAIGoalTile().transform;
+        //
+        // yield return StartCoroutine(MoveBallToShoot(
+        //     ball.transform, 
+        //     new Vector3(goalTileTrans.position.x, goalTileTrans.position.y, goalTileTrans.position.z)));
+        //
+        // UIManager.instance.AddAIScore(1);
+        // GameManager.instance.ResetRound();
+        yield break;
     }
 
     #endregion
