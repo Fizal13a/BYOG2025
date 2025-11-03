@@ -9,7 +9,6 @@ public class CardUIManager : MonoBehaviour
     public GameObject cardPrefab;
     public List<CardData> cardDataList;
 
-    // Use a single RectTransform for each area
     [Header("Containers")]
     public RectTransform allCardsPanel;
     public RectTransform selectedCardsPanel;
@@ -108,14 +107,11 @@ public class CardUIManager : MonoBehaviour
 
         int poolIndex = 0;
 
-        // Call the updated function for the main card list
         poolIndex = DisplayCardList(allCardsPanel, allCardDataList, poolIndex, all_cardWidth, all_cardHeight, all_horizontalSpacing, all_verticalSpacing, all_panelPadding);
 
-        // Call the updated function for the selected card list
         DisplayCardList(selectedCardsPanel, selectedCardDataList, poolIndex, selected_cardWidth, selected_cardHeight, selected_horizontalSpacing, selected_verticalSpacing, selected_panelPadding);
     }
 
-    // This function now takes a single "container" RectTransform
     private int DisplayCardList(RectTransform container, List<CardData> dataList, int startingPoolIndex, float cardWidth, float cardHeight, float hSpacing, float vSpacing, Vector2 padding)
     {
         if (container == null || dataList == null)
