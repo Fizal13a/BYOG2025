@@ -130,8 +130,9 @@ GameObject:
   - component: {fileID: 165854044}
   - component: {fileID: 165854046}
   - component: {fileID: 165854045}
+  - component: {fileID: 165854047}
   m_Layer: 5
-  m_Name: Character selection BG
+  m_Name: All Characters BG
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -148,13 +149,12 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1797550932}
+  m_Children: []
   m_Father: {fileID: 984648278}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.5}
-  m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 765, y: 53}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 765, y: -487}
   m_SizeDelta: {x: 1500, y: 900}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &165854045
@@ -195,6 +195,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 165854043}
   m_CullTransparentMesh: 1
+--- !u!114 &165854047
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 165854043}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31a19414c41e5ae4aae2af33fee712f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Mask
+  m_ShowMaskGraphic: 1
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -856,6 +869,79 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 637034879}
   m_CullTransparentMesh: 1
+--- !u!1 &810381195
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 810381196}
+  - component: {fileID: 810381197}
+  m_Layer: 0
+  m_Name: Cards UI Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &810381196
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 810381195}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1631158294}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &810381197
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 810381195}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d13b6e9672a991f4590aae7c90e9ce08, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CardUIManager
+  cardPrefab: {fileID: 5341286013546586822, guid: 23c7de8ea2de52542986aa92a7fb5327, type: 3}
+  cardDataList:
+  - {fileID: 11400000, guid: 9207d7ba3b7fc6146898d8421f8e606f, type: 2}
+  - {fileID: 11400000, guid: 0f76a801083ceb94caebed73fb7ed121, type: 2}
+  - {fileID: 11400000, guid: dacf3c17537f93840992b4bb48c6a857, type: 2}
+  - {fileID: 11400000, guid: 1acb2fd325008ce45b6b2578d9df59c2, type: 2}
+  - {fileID: 11400000, guid: 914ec52f1fea96d4b8b6e780f2eccaf9, type: 2}
+  - {fileID: 11400000, guid: 3c8cbc0cae5772f4d901ea3794f6ebdb, type: 2}
+  - {fileID: 11400000, guid: e45571ee74105fa4eaaab863e83610b6, type: 2}
+  - {fileID: 11400000, guid: dc32a438994fe8743b0815bc60d2009e, type: 2}
+  - {fileID: 11400000, guid: f062826db95cd7f4a8f5d8b59a1ae4a3, type: 2}
+  - {fileID: 11400000, guid: 5865dbc59c7d60d46a8f5c19f237a08d, type: 2}
+  - {fileID: 11400000, guid: fbbd87462f71f1843b5e05bbcd8a33ad, type: 2}
+  - {fileID: 11400000, guid: 05b9b949b744cb44c88d78fd622cdbad, type: 2}
+  allCardsPanel: {fileID: 165854044}
+  selectedCardsPanel: {fileID: 2020782034}
+  allCardDataList: []
+  selectedCardDataList: []
+  all_cardWidth: 200
+  all_cardHeight: 300
+  all_horizontalSpacing: 25
+  all_verticalSpacing: 25
+  all_panelPadding: {x: 20, y: 20}
+  selected_cardWidth: 200
+  selected_cardHeight: 300
+  selected_horizontalSpacing: 25
+  selected_verticalSpacing: 3
+  selected_panelPadding: {x: 75, y: 5}
+  initialPoolSize: 30
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -1060,7 +1146,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1460330690}
   m_CullTransparentMesh: 1
---- !u!1 &1797550931
+--- !u!1 &1631158293
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1068,33 +1154,30 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1797550932}
-  m_Layer: 5
-  m_Name: Characters
+  - component: {fileID: 1631158294}
+  m_Layer: 0
+  m_Name: Managers
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!224 &1797550932
-RectTransform:
+--- !u!4 &1631158294
+Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1797550931}
+  m_GameObject: {fileID: 1631158293}
+  serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 165854044}
+  m_Children:
+  - {fileID: 810381196}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1909290069
 GameObject:
   m_ObjectHideFlags: 0
@@ -1208,6 +1291,7 @@ GameObject:
   - component: {fileID: 2020782034}
   - component: {fileID: 2020782036}
   - component: {fileID: 2020782035}
+  - component: {fileID: 2020782037}
   m_Layer: 5
   m_Name: Selected characters BG
   m_TagString: Untagged
@@ -1272,6 +1356,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2020782033}
   m_CullTransparentMesh: 1
+--- !u!114 &2020782037
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2020782033}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31a19414c41e5ae4aae2af33fee712f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Mask
+  m_ShowMaskGraphic: 1
 --- !u!1 &2098910516
 GameObject:
   m_ObjectHideFlags: 0
@@ -1555,5 +1652,6 @@ SceneRoots:
   - {fileID: 330585546}
   - {fileID: 410087041}
   - {fileID: 832575519}
+  - {fileID: 1631158294}
   - {fileID: 1909290073}
   - {fileID: 489669459}
