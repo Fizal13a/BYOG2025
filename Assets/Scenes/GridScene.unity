@@ -2576,6 +2576,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 550176302}
   m_CullTransparentMesh: 1
+--- !u!1 &615194807
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 615194808}
+  - component: {fileID: 615194809}
+  m_Layer: 0
+  m_Name: GameManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &615194808
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 615194807}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 756562073}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &615194809
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 615194807}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d74acc9eccc36c440b1fb2ea26f3db1e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameManager
 --- !u!43 &692748828
 Mesh:
   m_ObjectHideFlags: 0
@@ -2790,6 +2834,7 @@ Transform:
   - {fileID: 1857454174}
   - {fileID: 142848132}
   - {fileID: 268093561}
+  - {fileID: 615194808}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &758924040
@@ -4739,11 +4784,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MatchManager
   ballPrefab: {fileID: 6843622914399733620, guid: 5ab2eaa897feeab4cbf4bf847a8fbdcb, type: 3}
   teamPrefab: {fileID: 6802688715420847592, guid: e9673ade79ea3c041bfd95b4141abcfb, type: 3}
+  aiTeamPrefab: {fileID: 5675888542712718155, guid: 6170ff27bd7074943bf3f740978a6236, type: 3}
   currentState: 0
   baseActionPoints: 3
   maxCarryOverPoints: 10
   turnDisplayText: {fileID: 1921553497}
   actionPointDisplayText: {fileID: 286973094}
+  playerTeamScoreDisplayText: {fileID: 0}
+  opponentTeamScoreDisplayText: {fileID: 0}
 --- !u!1 &1576105415
 GameObject:
   m_ObjectHideFlags: 0

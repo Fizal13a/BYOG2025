@@ -34,6 +34,12 @@ public class AIHandler : MonoBehaviour
     {
         teamManager =  team;
     }
+
+    public void SetAITurn(bool turn)
+    {
+        DebugLogger.Log("AI TURN - " + turn, "cyan");
+        StartCoroutine(PlayAITurn(turn));
+    }
     
     IEnumerator PlayAITurn(bool turn)
     {
@@ -214,7 +220,7 @@ public class AIHandler : MonoBehaviour
             {
                 int distToBall = ManhattanDistance(closestAI.GetGridPosition(), ballPos);
                 score = 400 - (distToBall * 50);
-                currentSelectedAI = closestAI;
+                SetSelectedPlayer(closestAI);
                 Debug.Log($"AI Move Option: Moving toward ball. Distance: {distToBall}, Score: {score}");
             }
         }
@@ -242,7 +248,7 @@ public class AIHandler : MonoBehaviour
 
         if (tackler != null)
         {
-            currentSelectedAI = tackler;
+            SetSelectedPlayer(tackler);
             
             int distToGoal = ManhattanDistance(ballPos, GridGenerator.instance.GetOpponentGoalTile().GridPosition);
             float score = 700 - (distToGoal * 50);
@@ -334,73 +340,34 @@ public class AIHandler : MonoBehaviour
 
     IEnumerator ExecutePass(Player receiver)
     {
-        // if (!MatchManager.instance.CheckActionPoints(GetActionCost(ActionData.Actions.Pass)))
-        // {
-        //     yield break;
-        // }
-        //
-        // if (teamManager.GetCurrentPlayerWithBall() == null || receiver == null)
-        //     yield break;
-        //
-        // Debug.Log($"{teamManager.GetCurrentPlayerWithBall().name} passing to {receiver.name}");
-        //
-        // yield return StartCoroutine(teamManager.ExecuteMove());
+        if (!MatchManager.instance.CheckActionPoints(GetActionCost(ActionData.Actions.Pass)))
+        {
+            yield break;
+        }
+        
+        yield return StartCoroutine(teamManager.BallPass(receiver.ballHolderPosition));
         yield break;
     }
 
     IEnumerator ExecuteTackle()
     {
-        // if (!GameManager.instance.CheckActionPoints(GetActionCost(ActionData.Actions.Tackle)))
-        // {
-        //     yield break;
-        // }
-        //
-        // if (currentSelectedAI == null)
-        //     yield break;
-        //
-        // Debug.Log($"{currentSelectedAI.name} tackling for the ball");
-        //
-        //
-        // //#region Play Animation
-        //
-        // //Animator animator = currentSelectedAI.GetComponentInChildren<Animator>();
-        // //AnimationManager.Instance.TackleAnim(animator);
-        //
-        // //#endregion
-        //
-        // SetPlayerWithBall(currentSelectedAI);
-        // PlayerController.instance.RemovePlayerWithBall();
-        // GameManager.instance.SetBallPosition(currentSelectedAI.GetGridPosition());
-
+        if (!MatchManager.instance.CheckActionPoints(GetActionCost(ActionData.Actions.Tackle)))
+        {
+            yield break;
+        }
+        
+        yield return StartCoroutine(teamManager.Tackle());
         yield return new WaitForSeconds(2f);
     }
 
     IEnumerator ExecuteShoot()
     {
-        // if (!GameManager.instance.CheckActionPoints(GetActionCost(ActionData.Actions.Shoot)))
-        // {
-        //     yield break;
-        // }
-        //
-        // if (currentAIWithBall == null)
-        //     yield break;
-        //
-        // Debug.Log($"{currentAIWithBall.name} shooting at goal!");
-        //
-        // //#region Play Animation
-        // //Animator animator = currentAIWithBall.GetComponentInChildren<Animator>();
-        // //AnimationManager.Instance.ShootAnim(animator);
-        // //#endregion
-        //
-        // GameObject ball = GameManager.instance.GetBallObject();
-        // Transform goalTileTrans = GameManager.instance.GetAIGoalTile().transform;
-        //
-        // yield return StartCoroutine(MoveBallToShoot(
-        //     ball.transform, 
-        //     new Vector3(goalTileTrans.position.x, goalTileTrans.position.y, goalTileTrans.position.z)));
-        //
-        // UIManager.instance.AddAIScore(1);
-        // GameManager.instance.ResetRound();
+        if (!MatchManager.instance.CheckActionPoints(GetActionCost(ActionData.Actions.Shoot)))
+        {
+            yield break;
+        }
+        
+        yield return StartCoroutine(teamManager.ShootToGoal());
         yield break;
     }
 
@@ -420,7 +387,7 @@ public class AIHandler : MonoBehaviour
 
     private int GetActionCost(ActionData.Actions action)
     {
-        foreach (var actionData in availableActions)
+        foreach (var actionData in teamManager.availableActions)
         {
             if (actionData.action == action)
                 return actionData.actionCost;
@@ -519,30 +486,35 @@ public class AIHandler : MonoBehaviour
         Vector2Int dir = to.GridPosition - from.GridPosition;
         int moveX = dir.x != 0 ? (dir.x > 0 ? 1 : -1) : 0;
         int moveY = dir.y != 0 ? (dir.y > 0 ? 1 : -1) : 0;
+        
+        Vector2Int direc =  new Vector2Int(0, 0);
 
         // Try diagonal
-        // if (moveX != 0 && moveY != 0)
-        // {
-        //     GridTile diag = GridGenerator.instance.GetTile(from.GridPosition.x + moveX, from.GridPosition.y + moveY);
-        //     if (diag != null && !diag.IsOccupied())
-        //         return diag;
-        // }
-        //
-        // // Try horizontal
-        // if (moveX != 0)
-        // {
-        //     GridTile horiz = GridGenerator.instance.GetTile(from.GridPosition.x + moveX, from.GridPosition.y);
-        //     if (horiz != null && !horiz.IsOccupied())
-        //         return horiz;
-        // }
-        //
-        // // Try vertical
-        // if (moveY != 0)
-        // {
-        //     GridTile vert = GridGenerator.instance.GetTile(from.GridPosition.x, from.GridPosition.y + moveY);
-        //     if (vert != null && !vert.IsOccupied())
-        //         return vert;
-        // }
+        if (moveX != 0 && moveY != 0)
+        {
+            direc = new Vector2Int(from.GridPosition.x + moveX, from.GridPosition.y + moveY);
+            GridTile diag = GridGenerator.instance.GetTile(direc);
+            if (diag != null && !diag.IsOccupied())
+                return diag;
+        }
+        
+        // Try horizontal
+        if (moveX != 0)
+        {
+            direc = new Vector2Int(from.GridPosition.x + moveX, from.GridPosition.y);
+            GridTile horiz = GridGenerator.instance.GetTile(direc);
+            if (horiz != null && !horiz.IsOccupied())
+                return horiz;
+        }
+        
+        // Try vertical
+        if (moveY != 0)
+        {
+            direc = new Vector2Int(from.GridPosition.x, from.GridPosition.y + moveY);
+            GridTile vert = GridGenerator.instance.GetTile(direc);
+            if (vert != null && !vert.IsOccupied())
+                return vert;
+        }
 
         return null;
     }
@@ -563,4 +535,9 @@ public class AIHandler : MonoBehaviour
     }
 
     #endregion
+
+    private void SetSelectedPlayer(Player player)
+    {
+        teamManager.SetCurrentPlayer(player);
+    }
 }

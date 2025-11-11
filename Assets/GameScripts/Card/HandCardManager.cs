@@ -37,6 +37,8 @@ public class HandCardManager : MonoBehaviour
 
     IEnumerator DrawCardsRoutine()
     {
+        DebugLogger.Log("Drawing Cards");
+        
         currentHandCards.Clear();
         currentActionPointsInHand = 0;
 
@@ -101,7 +103,11 @@ public class HandCardManager : MonoBehaviour
 
     private void OnTurnChange(Team.TeamType teamType)
     {
-        if(teamType == Team.TeamType.Player) DrawCards();
+        DebugLogger.Log($"Turn changed to {teamType}", "yellow");
+        if (teamType == Team.TeamType.Player)
+        {
+            DrawCards();
+        }
         
         ClearCards();
     }

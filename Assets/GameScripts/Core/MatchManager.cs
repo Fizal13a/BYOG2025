@@ -41,6 +41,8 @@ public partial class MatchManager : MonoBehaviour
         matchEvents.AddEvent(MatchEvents.MatchEventType.OnRoundReset, ResetRound);
         matchEvents.AddEvent(MatchEvents.MatchEventType.OnRoundReset, StopAllTurns);
         matchEvents.AddEvent<Team.TeamType>(MatchEvents.MatchEventType.OnTurnStart,SetCurrentTeamOnPlay);
+        DebugLogger.Log("Events added");
+        
         SetUpTurnStates();
     }
 
@@ -119,6 +121,7 @@ public partial class MatchManager : MonoBehaviour
     public void SetCurrentTeamOnPlay(Team.TeamType team)
     {
         currentTeamOnPlay = (team == Team.TeamType.Player) ? playerTeam : opponentTeam;
+        DebugLogger.Log("CurrentTeamOnPlay" + currentTeamOnPlay.ToString(), "yellow");
     }
     
     #endregion
@@ -162,4 +165,9 @@ public partial class MatchManager : MonoBehaviour
     }
 
     #endregion
+
+    private void DebugFuntion(Team.TeamType  team)
+    {
+        DebugLogger.Log("Debug function", "green");
+    }
 }

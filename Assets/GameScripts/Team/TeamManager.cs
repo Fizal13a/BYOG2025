@@ -8,18 +8,16 @@ public class TeamManager : MonoBehaviour
 {
     public MatchSettings matchSettings;
 
-    [Header("Events")] 
-    public static TeamEvents events;
+    [Header("Events")] public static TeamEvents events;
 
-    [Header("Team")] 
-    private Team team;
+    [Header("Team")] private Team team;
 
-    [Header("Players")] 
-    public GameObject playerPrefab;
+    [Header("Players")] public GameObject playerPrefab;
     public GameObject opponentPrefab;
     private List<Player> players = new List<Player>();
 
-    [Header("Match")] private bool isCurrectTurn = false;
+    [Header("Match")] [SerializeField] private LayerMask tileLayer;
+    private bool isCurrectTurn = false;
     private Player currentSelectedPlayer;
     private Player currentPlayerWithBall;
     private Player currentPassTarget;
@@ -27,13 +25,16 @@ public class TeamManager : MonoBehaviour
     [Header("Actions")] public List<ActionData> availableActions = new List<ActionData>();
     private ActionData currentAction;
 
-    [Header("Condition bool")] 
-    private bool hasBall = false;
+    [Header("Condition bool")] private bool hasBall = false;
     private bool canSelect = false;
     private bool canPass = false;
     private bool canMove = false;
     private bool canTackle = false;
     private bool canShoot = false;
+    
+    [Header("AI")]
+    private AIHandler aiHandler;
+    private bool hasAI = false;
 
     #region Initialization
 
@@ -46,12 +47,22 @@ public class TeamManager : MonoBehaviour
     {
         this.team = team;
 
+        if (GameManager.instance.GetCurrentMode() == MatchData.MatchMode.Local && this.team.teamType == Team.TeamType.Opponent)
+        {
+            AIHandler ai = GetComponent<AIHandler>();
+            if (ai != null)
+            {
+                aiHandler = ai;
+                aiHandler.SetAI(this);
+                hasAI = true;
+            }
+        }
+
         //events
         events.AddEvent<Team.TeamType>(TeamEvents.TeamEventType.CheckConditions, SetConditions);
         events.AddEvent(TeamEvents.TeamEventType.ResetPosition, ResetPositions);
         MatchManager.matchEvents.AddEvent<Team.TeamType>(MatchEvents.MatchEventType.OnTurnStart, OnTurnChange);
 
-        //spawnPlayers
         SpawnPlayers();
     }
 
@@ -95,6 +106,11 @@ public class TeamManager : MonoBehaviour
         hasBall = status;
     }
 
+    public void SetCurrentPlayer(Player player)
+    {
+        currentSelectedPlayer = player;
+    }
+
     private void OnTurnChange(Team.TeamType currTeam)
     {
         SetUpTurn(team.teamType == currTeam);
@@ -103,6 +119,10 @@ public class TeamManager : MonoBehaviour
     public void SetUpTurn(bool turn)
     {
         isCurrectTurn = turn;
+        if (hasAI && aiHandler != null)
+        {
+            aiHandler.SetAITurn(isCurrectTurn);
+        }
     }
 
     public void SetPlayerWithBall(Player player = null)
@@ -129,7 +149,7 @@ public class TeamManager : MonoBehaviour
 
     public void SetConditions(Team.TeamType teamType)
     {
-        if (team.teamType != teamType) return;
+        if (team.teamType != teamType || currentSelectedPlayer == null) return;
 
         canPass = canMove = canShoot = canTackle = true;
 
@@ -176,6 +196,34 @@ public class TeamManager : MonoBehaviour
     public Player GetCurrentPlayerWithBall()
     {
         return currentPlayerWithBall;
+    }
+
+    public GridTile GetSelectedTile()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit, 100, tileLayer))
+        {
+            // Get the object we hit
+            GameObject clickedObject = hit.collider.gameObject;
+            Debug.Log("Clicked on: " + hit.collider.gameObject.name);
+
+            if (clickedObject != null)
+            {
+                GridTile tile = clickedObject.GetComponent<GridTile>();
+                if (tile != null && tile.isHighlighted)
+                {
+                    return tile;
+                }
+            }
+        }
+        else
+        {
+            Debug.Log("Didn't hit anything");
+        }
+
+        return null;
     }
 
     #endregion
@@ -236,12 +284,12 @@ public class TeamManager : MonoBehaviour
     {
         currentSelectedPlayer = currPlayer;
         currentAction = GetAction(state);
-        
+
         // Clear all highlighted tiles
         GridGenerator.instance.ClearHighlightedTiles();
         // Checks for action points
         if (!MatchManager.instance.CheckActionPoints(currentAction.actionCost)) yield break;
-        
+
         // Actions state handling
         switch (state)
         {
@@ -256,12 +304,12 @@ public class TeamManager : MonoBehaviour
                 break;
 
             case ActionData.Actions.Tackle:
-                //Tackle();
+                yield return StartCoroutine(Tackle());
                 DebugLogger.Log("Player On Tackle State", "yellow");
                 break;
 
             case ActionData.Actions.Shoot:
-                //ShootToGoal();
+                yield return StartCoroutine(ShootToGoal());
                 DebugLogger.Log("Player On Shoot State", "yellow");
                 break;
 
@@ -269,54 +317,57 @@ public class TeamManager : MonoBehaviour
                 DebugLogger.Log("Player On Dash State", "yellow");
                 break;
         }
+
+        GridGenerator.instance.ClearHighlightedTiles();
+        MatchManager.instance.CheckEndTurn();
     }
+
+    private ActionData GetAction(ActionData.Actions action)
+    {
+        foreach (var act in availableActions)
+        {
+            DebugLogger.Log($"Action {act.action.ToString()}", "yellow");
+            if (act.action == action)
+            {
+                DebugLogger.Log($"Player On Action {act.action.ToString()}", "yellow");
+                return act;
+            }
+        }
+
+        DebugLogger.Log($"Player action is null", "yellow");
+        return null;
+    }
+
+    #endregion
+
+    #region Action Execution
+
+    #region MOVE
 
     private IEnumerator CheckForTargetTileSelection()
     {
         GridGenerator.instance.HighlightMoveTiles(currentSelectedPlayer);
-        GridTile moveTargTile = new GridTile();
+        GridTile moveTargTile = null;
         canSelect = true;
 
         while (canSelect)
         {
-            
+            if (Input.GetMouseButtonDown(0))
+            {
+                GridTile selectedTile = GetSelectedTile();
+                if (selectedTile != null)
+                {
+                    moveTargTile = selectedTile;
+                    canSelect = false;
+                }
+            }
+
             yield return null;
         }
 
         yield return StartCoroutine(ExecuteMove(moveTargTile));
     }
 
-    private IEnumerator CheckForTargetPlayerSelection()
-    {
-        foreach (var player in players)
-        {
-            if (player == currentPlayerWithBall) continue;
-
-            Vector2Int positionIndex = player.GetGridPosition();
-            GridGenerator.instance.HighlightPassTiles(positionIndex);
-        }
-        canSelect = true;
-        
-        GridTile tile = new GridTile();
-        
-        while (canSelect)
-        {
-            
-            yield return null;
-        }
-        
-        foreach (var player in players)
-        {
-            if (player.GetGridPosition() == tile.GridPosition)
-            {
-                currentPassTarget = player;
-                break;
-            }
-        }
-
-        ExecutePass(currentPassTarget);
-    }
-    
     public IEnumerator ExecuteMove(GridTile targetTile)
     {
         // Update tile occupancy
@@ -356,54 +407,43 @@ public class TeamManager : MonoBehaviour
 
         //GameManager.instance.CheckEndTurn();
         currentSelectedPlayer = null;
-        
+
         yield return null;
     }
 
-    public IEnumerator ExecutePass(Player targetPlayer)
-    {
-        yield return null;
-    }
+    #endregion
 
-    private ActionData GetAction(ActionData.Actions action)
+    #region PASS
+
+    private IEnumerator CheckForTargetPlayerSelection()
     {
-        foreach (var act in availableActions)
+        foreach (var player in players)
         {
-            if (act.action == action)
-            {
-                return act;
-            }
+            if (player == currentPlayerWithBall) continue;
+
+            Vector2Int positionIndex = player.GetGridPosition();
+            GridGenerator.instance.HighlightPassTiles(positionIndex);
         }
 
-        return null;
-    }
+        canSelect = true;
 
-    #endregion
+        GridTile tile = null;
 
-    #region Action Execution
+        while (canSelect)
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                GridTile selectedTile = GetSelectedTile();
+                if (selectedTile != null)
+                {
+                    tile = selectedTile;
+                    canSelect = false;
+                }
+            }
 
-    // --- Move to the selected Tile ---
+            yield return null;
+        }
 
-    #region Movement
-
-    private void MoveToTile(GridTile targetTile)
-    {
-        StartCoroutine(MoveToTileRoutine(targetTile));
-    }
-
-    private IEnumerator MoveToTileRoutine(GridTile targetTile)
-    {
-       yield break;
-    }
-
-    #endregion
-
-    // --- Once the target player is selected, pass the ball to that player ---
-
-    #region Pass
-
-    private void PassToPlayer(GridTile tile)
-    {
         foreach (var player in players)
         {
             if (player.GetGridPosition() == tile.GridPosition)
@@ -414,54 +454,48 @@ public class TeamManager : MonoBehaviour
             }
         }
 
-        GameObject ball = MatchManager.instance.GetBallObject();
-        ball.transform.SetParent(null);
-
-        StartCoroutine(BallPass(currentPassTarget.ballHolderPosition));
-        MatchManager.instance.SetBallPosition(currentPlayerWithBall.GetGridPosition());
-        currentSelectedPlayer = null;
+        yield return StartCoroutine(BallPass(currentPassTarget.ballHolderPosition));
     }
 
-    private IEnumerator BallPass(Transform targetTile)
+    public IEnumerator BallPass(Transform targetTile)
     {
         if (targetTile == null) yield break;
+
+        GameObject ball = MatchManager.instance.GetBallObject();
+        ball.transform.SetParent(null);
+        MatchManager.instance.SetBallPosition(currentPlayerWithBall.GetGridPosition());
+        currentSelectedPlayer = null;
 
         yield return StartCoroutine(BallController.instance.MoveBall(targetTile));
 
         SetPlayerWithBall(currentPlayerWithBall);
-        //GameManager.instance.CheckEndTurn();
     }
 
     #endregion
+    
+    #region TACKLE
 
-    // --- Once the AI with ball is in the adjustment tile, Can get the ball back ---
-
-    #region Tackle
-
-    private void Tackle()
+    public IEnumerator Tackle()
     {
         Vector2Int playerGridPos = currentSelectedPlayer.GetGridPosition();
         MatchManager.instance.SetBallPosition(playerGridPos);
         SetPlayerWithBall(currentSelectedPlayer);
         //AIPlayerController.instance.RemoveBall();
-
-        //GameManager.instance.CheckEndTurn();
+        yield return null;
     }
 
     #endregion
+    
+    #region SHOOT
 
-    // --- Shoot the ball to goal ---
-
-    #region Shoot
-
-    private void ShootToGoal()
+    public IEnumerator ShootToGoal()
     {
         Vector2Int tileIndex = GridGenerator.instance.matchSettings.teamGoalPosition;
         GridTile targetTile = GridGenerator.instance.GetTile(tileIndex);
 
         Transform targetPos = targetTile.transform;
 
-        StartCoroutine(BallShootToGoal(targetPos));
+        yield return StartCoroutine(BallShootToGoal(targetPos));
 
         currentSelectedPlayer = null;
     }

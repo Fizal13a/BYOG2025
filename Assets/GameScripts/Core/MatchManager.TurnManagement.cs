@@ -48,8 +48,15 @@ public partial class MatchManager : MonoBehaviour
                 currentAITurnCoroutine = null;
             }
         }
+
+        Team.TeamType currTeamType = Team.TeamType.Player;
+        if (currentState == PlayState.OpponentTurn)
+        {
+            currTeamType = Team.TeamType.Opponent;
+        }
         
-        matchEvents.TriggerEvent(MatchEvents.MatchEventType.OnTurnStart, Team.TeamType.Player);
+        matchEvents.TriggerEvent(MatchEvents.MatchEventType.OnTurnStart, currTeamType);
+        DebugLogger.Log($"Trriggering event {MatchEvents.MatchEventType.OnTurnStart.ToString()}", "cyan");
     }
 
     // --- Turn End ---

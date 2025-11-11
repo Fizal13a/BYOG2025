@@ -38,6 +38,11 @@ public class Player : MonoBehaviour
     {
         origionalGridPosition = origionalGridPos;
     }
+
+    public void HandleStates(ActionData.Actions action)
+    {
+        teamManager.HandleStates(action, this);
+    }
     
     public Vector2Int GetGridPosition() => GridPosition;
     public Vector2Int GetOrigionalGridPosition() => origionalGridPosition;

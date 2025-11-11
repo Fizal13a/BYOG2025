@@ -21,12 +21,15 @@ public class GridTile : MonoBehaviour
     [HideInInspector] public GridTile parent;
     
     private Image uiImage;
+    
+    public bool isHighlighted;
 
     private void Awake() => rend = GetComponent<Renderer>();
 
     public void Highlight(bool active)
     {
         SetColor(active ? Color.yellow : Color.white);
+        isHighlighted = active;
     }
 
     public void SetGridPosition(Vector2Int gridPosition)
